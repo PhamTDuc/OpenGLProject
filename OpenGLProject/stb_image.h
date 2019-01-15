@@ -7342,6 +7342,13 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
 
 #endif // STB_IMAGE_IMPLEMENTATION
 
+class stb_image
+{
+public:
+	stb_image();
+	~stb_image();
+};
+
 /*
    revision history:
 	  2.19  (2018-02-11) fix warning
