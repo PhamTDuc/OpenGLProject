@@ -130,7 +130,9 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	Shader modelShadingnanosuit("GLSL/Model/Vertex.vs", "GLSL/Model/Fragment.fs");
-	Model nanosuitobj("Model/Nanosuit/nanosuit.obj");
+	Model nanosuitobj("Model/model.obj");
+	// Draw Wireframe
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
