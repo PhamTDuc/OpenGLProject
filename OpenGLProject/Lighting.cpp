@@ -8,8 +8,17 @@
 #include "LoadingTexture.h"
 #include "Shader.h"
 #include "Camera.h"
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 float ratio = (float)4 / 3;
+bool firstMouse = true;
+float lastX = 0.0f, lastY = 0.0f;
+float yaw = -90.0f, pitch = 0.0f;
+float fov = 45.0f;
 Camera cam(glm::vec3(1.0f,1.0f,11.0f));
 int main()
 {
@@ -90,8 +99,8 @@ int main()
 
 	// Setting Shading
 	// Setting Shading
-	Shader lightShading("Debug/ShadingCode/LightingShading/Vert.txt", "Debug/ShadingCode/LightingShading/Frag.txt");
-	Shader modelShading("Debug/ShadingCode/ModelShading/Vert.txt", "Debug/ShadingCode/ModelShading/Frag.txt");
+	Shader lightShading("Debug/GLSL/LightShade/Vertex.vs", "Debug/GLSL/LightShade/Fragment.fs");
+	Shader modelShading("Debug/GLSL/Vertex.vs", "Debug/GLSL/Fragment.fs");
 
 	unsigned int lightVAO,VBO;
 
@@ -115,11 +124,13 @@ int main()
 	unsigned int textures[3];
 	textures[0] = loadTexture("Debug/Texture/diffuse.png");
 	textures[1] = loadTexture("Debug/Texture/specular.png");
-	textures[2] = loadTexture("Debug/Texture/matrix.jpg");
+	textures[2] = loadTexture("Debug/Texture/emission.jpg");
 
-
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 	while (!glfwWindowShouldClose(window))
 	{
+		processInput(window);
 		//Render here
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -138,7 +149,6 @@ int main()
 		lightShading.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		lightShading.setMat4fv("projection", 1, GL_FALSE, projection);
 		lightShading.setMat4fv ("model", 1, GL_FALSE, light);
-		lightShading.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
 		// Draw light
 		glBindVertexArray(lightVAO);
@@ -199,13 +209,16 @@ int main()
 		modelShading.setVec3("light.ambient", glm::vec3(0.2f));
 		modelShading.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 		modelShading.setVec3("light.diffuse", glm::vec3(1.0f));
-		modelShading.setVec3("light.pos", lightPos);
-		modelShading.setVec3("light.direction", -lightPos );
-		modelShading.setFloat("light.innerCutOff", glm::cos(glm::radians(10.5f)));
-		modelShading.setFloat("light.outerCutOff", glm::cos(glm::radians(15.5f)));
+		//modelShading.setVec3("light.direction", cubePositions[0]-lightPos);// Direction Light
+
+		modelShading.setVec3("light.position", lightPos);// Point Light 
 		modelShading.setFloat("light.constant", 0.5f);
 		modelShading.setFloat("light.linear", 0.09f);
 		modelShading.setFloat("light.quadratic", 0.032f);
+		
+		modelShading.setVec3("light.direction", -lightPos);// Spot Light
+		modelShading.setFloat("light.innerCutOff", glm::cos(glm::radians(10.5f)));
+		modelShading.setFloat("light.outerCutOff", glm::cos(glm::radians(15.5f)));
 
 
 		for (unsigned int i = 0; i < 10; i++)
@@ -233,4 +246,51 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	ratio = (float)width / height;
 	glViewport(0, 0, width, height);
 
+}
+
+void processInput(GLFWwindow *window) {
+	float currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cam.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cam.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cam.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cam.ProcessKeyboard(RIGHT, deltaTime);
+
+}
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.1);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 80.0f)
+		fov -= yoffset * 5;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 80.0f)
+		fov = 80.0f;
 }

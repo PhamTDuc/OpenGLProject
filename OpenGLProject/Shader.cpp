@@ -3,7 +3,7 @@
 
 
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
 {
 	// 1. retrieve the vertex/fragment source code from filePath
 	std::string vertexCode;
@@ -16,8 +16,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	try
 	{
 		// open files
-		vShaderFile.open(vertexPath);
-		fShaderFile.open(fragmentPath);
+		vShaderFile.open(vertexPath.c_str());
+		fShaderFile.open(fragmentPath.c_str());
 		std::stringstream vShaderStream, fShaderStream;
 		// read file's buffer contents into streams
 		vShaderStream << vShaderFile.rdbuf();
@@ -32,6 +32,9 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	catch (std::ifstream::failure e)
 	{
 		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+		std::cout<<"VERTEX PATH:"<<vertexPath<<std::endl;
+		std::cout<<"FRAGMENT PATH:"<<fragmentPath<<std::endl;
+
 	}
 	const char* vShaderCode = vertexCode.c_str();
 	const char * fShaderCode = fragmentCode.c_str();
@@ -41,18 +44,18 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	vertex = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex, 1, &vShaderCode, NULL);
 	glCompileShader(vertex);
-	checkCompileErrors(vertex, "VERTEX");
+	checkCompileErrors(vertex, "VERTEX in path"+vertexPath);
 	// fragment Shader
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fShaderCode, NULL);
 	glCompileShader(fragment);
-	checkCompileErrors(fragment, "FRAGMENT");
+	checkCompileErrors(fragment, "FRAGMENT in path"+fragmentPath);
 	// shader Program
 	ID = glCreateProgram();
 	glAttachShader(ID, vertex);
 	glAttachShader(ID, fragment);
 	glLinkProgram(ID);
-	checkCompileErrors(ID, "PROGRAM");
+	checkCompileErrors(ID, "PROGRAM in Vertex path"+vertexPath+" and Fragment path "+fragmentPath);
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
