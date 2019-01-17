@@ -8,6 +8,7 @@
 *.sln.docstates
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+!nanosuit.obj
 
 # Build results
 [Dd]ebug/
@@ -49,6 +50,7 @@ artifacts/
 *_i.h
 *.ilk
 *.meta
+
 *.obj
 *.pch
 *.pdb
