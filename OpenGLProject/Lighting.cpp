@@ -99,8 +99,8 @@ int main()
 
 	// Setting Shading
 	// Setting Shading
-	Shader lightShading("Debug/GLSL/LightShade/Vertex.vs", "Debug/GLSL/LightShade/Fragment.fs");
-	Shader modelShading("Debug/GLSL/Vertex.vs", "Debug/GLSL/Fragment.fs");
+	Shader lightShading("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
+	Shader modelShading("GLSL/Vertex.vs", "GLSL/Fragment.fs");
 
 	unsigned int lightVAO,VBO;
 
@@ -122,9 +122,9 @@ int main()
 	// Using Texture 
 	// Using Texture 
 	unsigned int textures[3];
-	textures[0] = loadTexture("Debug/Texture/diffuse.png");
-	textures[1] = loadTexture("Debug/Texture/specular.png");
-	textures[2] = loadTexture("Debug/Texture/emission.jpg");
+	textures[0] = loadTexture("Texture/diffuse.png");
+	textures[1] = loadTexture("Texture/specular.png");
+	textures[2] = loadTexture("Texture/emission.jpg");
 
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
