@@ -8,6 +8,7 @@
 #include "LoadingTexture.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Model.h"
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 void processInput(GLFWwindow *window);
@@ -19,7 +20,7 @@ bool firstMouse = true;
 float lastX = 0.0f, lastY = 0.0f;
 float yaw = -90.0f, pitch = 0.0f;
 float fov = 45.0f;
-Camera cam(glm::vec3(1.0f,1.0f,11.0f));
+Camera cam(glm::vec3(0.0f,0.0f,20.0f));
 int main()
 {
 
@@ -128,12 +129,14 @@ int main()
 
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	Shader modelShadingnanosuit("GLSL/Model/Vertex.vs", "GLSL/Model/Fragment.fs");
+	Model nanosuitobj("Model/Nanosuit/nanosuit.obj");
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
 		//Render here
 		glEnable(GL_DEPTH_TEST);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -145,7 +148,7 @@ int main()
 		// Setting Camera
 		lightShading.use();
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 10000.0f);
 		lightShading.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		lightShading.setMat4fv("projection", 1, GL_FALSE, projection);
 		lightShading.setMat4fv ("model", 1, GL_FALSE, light);
@@ -163,11 +166,10 @@ int main()
 		glm::mat4 model(1.0f);
 		model = glm::rotate(model,glm::radians(-20.0f),glm::vec3(0.0f,0.0f,1.0f));
 		model=glm::scale(model,glm::vec3(2.0f,2.0f,2.0f));
-		//model=glm::translate(model,glm::vec3(0.0f,-8.5f,-0.1f));
+		model=glm::translate(model,glm::vec3(0.0f,-8.5f,-0.1f));
 		modelShading.setMat4fv ("model", 1, GL_FALSE, model);
 		modelShading.setVec3("viewPos", cam.getPos()); 
 		modelShading.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-
 
 		glm::vec3 cubePositions[] = {
 			glm::vec3(0.0f,  0.0f,  0.0f),
@@ -232,6 +234,14 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		modelShadingnanosuit.use();
+		modelShadingnanosuit.setMat4fv("view", 1, GL_FALSE, cam.getView());
+		modelShadingnanosuit.setMat4fv("projection", 1, GL_FALSE, projection);
+		glm::mat4 modelnanosuit = glm::mat4(1.0f);
+		modelnanosuit = glm::translate(modelnanosuit, glm::vec3(0.0f, -2.0f, 2.0f)); // translate it down so it's at the center of the scene
+		modelnanosuit = glm::scale(modelnanosuit, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
+		modelShadingnanosuit.setMat4fv("model", 1, GL_FALSE, modelnanosuit);
+		nanosuitobj.Draw(modelShadingnanosuit);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -282,7 +292,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	float yoffset = lastY - ypos;
 	lastX = xpos;
 	lastY = ypos;
-	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.1);
+	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.5);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)

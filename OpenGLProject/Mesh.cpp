@@ -28,6 +28,11 @@ void Mesh::setupMesh(){
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex,Normal));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+	// vertex bitangent
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 	glBindVertexArray(0);
 }
 
@@ -38,7 +43,7 @@ void Mesh::Draw(Shader &shader)
     for(unsigned int i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-        // retrieve texture number (the N in diffuse_textureN)
+        // retrieve texture number (the N in diffuseN)
         std::string number;
         std::string name = textures[i].typeName;
         if(name == "diffuse")
@@ -46,7 +51,8 @@ void Mesh::Draw(Shader &shader)
         else if(name == "specular")
             number = std::to_string(specularNum++);
 
-        shader.setInt(("material." + name + number).c_str(), i);
+		glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+	
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);

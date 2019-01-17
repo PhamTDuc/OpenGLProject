@@ -1,7 +1,10 @@
 #include "Model.h"
+Model::Model(std::string const &path) {
+	loadModel(path);
+};
 void Model::Draw(Shader &shader){
-    for(auto mesh:meshes){
-    	mesh.Draw(shader);
+    for(unsigned int i = 0; i < meshes.size(); i++){
+    	meshes[i].Draw(shader);
     }
 }  
 
@@ -16,6 +19,7 @@ void Model::loadModel(std::string path){
 	}
 	
 	directory=path.substr(0,path.find_last_of('/'));	
+	processNode(scene->mRootNode, scene);
 }
 
 void Model::processNode(aiNode *node, const aiScene *scene)
