@@ -114,7 +114,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *material, aiTexture
         {   // if texture hasn't been loaded already, load it
             Texture texture;
             std::string rel_path(str.C_Str());
-            std::string abs_path=this->directory+'/'+rel_path;
+            std::string abs_path=this->directory+"/"+rel_path;
             texture.id = loadTexture(abs_path);
             texture.typeName = typeName;
             texture.path = str.C_Str();
