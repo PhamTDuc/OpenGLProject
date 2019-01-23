@@ -10,6 +10,9 @@
 #include "Camera.h"
 #include "Model.h"
 
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 Camera cam(glm::vec3(0.0f, 0.0f, 20.0f));
@@ -45,17 +48,17 @@ int main() {
 	Model castle("Model/castle/castle.obj");
 
 	while (!glfwWindowShouldClose(window)) {
-
+		processInput(window);
 		glfwPollEvents();
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_ALWAYS);
+		//glDepthFunc(GL_ALWAYS);
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 		shader.use();
 		glm::mat4 model=glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -10.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model,glm::vec3(0.12f));
 		glm::mat4 projection;
 		projection=glm::perspective(glm::radians(45.0f),ratio,0.1f,100.0f);
@@ -77,5 +80,25 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	ratio = (float)width / height;
 	glViewport(0, 0, width, height);
+
+}
+
+void processInput(GLFWwindow *window) {
+	float currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cam.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cam.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cam.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cam.ProcessKeyboard(RIGHT, deltaTime);
 
 }

@@ -24,7 +24,7 @@ bool firstMouse = true;
 float lastX = 0.0f, lastY = 0.0f;
 float yaw = -90.0f, pitch = 0.0f;
 float fov = 45.0f;
-Camera cam(glm::vec3(0.0f,0.0f,20.0f));
+Camera cam(glm::vec3(0.0f,0.0f,10.0f));
 int main()
 {
 
@@ -170,7 +170,7 @@ int main()
 		// Setting Camera
 		lightShading.use();
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 10000.0f);
+		projection = glm::perspective(glm::radians(50.0f), ratio, 0.1f, 1000.0f);
 		lightShading.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		lightShading.setMat4fv("projection", 1, GL_FALSE, projection);
 		lightShading.setMat4fv ("model", 1, GL_FALSE, light);
