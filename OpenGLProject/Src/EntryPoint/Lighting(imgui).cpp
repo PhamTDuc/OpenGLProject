@@ -8,10 +8,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include "LoadingTexture.h"
-#include "Shader.h"
-#include "Camera.h"
-#include "Model.h"
+#include "../../LoadingTexture.h"
+#include "../../Shader.h"
+#include "../../Camera.h"
+#include "../../Model.h"
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
