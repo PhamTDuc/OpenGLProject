@@ -29,7 +29,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -42,7 +42,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -83,9 +83,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -94,9 +96,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,7 +137,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="LoadingTexture.cpp" />
-    <ClCompile Include="Src\EntryPoint\Lighting(imgui).cpp" />
+    <ClCompile Include="Src\EntryPoint\GeometryShader.cpp" />
     <ClCompile Include="Src\imgui\imgui.cpp" />
     <ClCompile Include="Src\imgui\imgui_demo.cpp" />
     <ClCompile Include="Src\imgui\imgui_draw.cpp" />
@@ -171,7 +175,30 @@
     <Text Include="Debug\ShadingCode\Vertex.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GLSL\AdvancedGLSL\Fragment.fs" />
+    <None Include="GLSL\AdvancedGLSL\Vertex.vs" />
+    <None Include="GLSL\AdvancedGLSL\Fragment2.fs" />
+    <None Include="GLSL\Fragment.fs" />
+    <None Include="GLSL\GeometryShader\Fragment.fs" />
+    <None Include="GLSL\GeometryShader\Geometry.gs" />
+    <None Include="GLSL\GeometryShader\Vertex.vs" />
+    <None Include="GLSL\GeometryShader\VisualizeVector\Fragment.fs" />
+    <None Include="GLSL\GeometryShader\VisualizeVector\Geometry.gs" />
+    <None Include="GLSL\GeometryShader\VisualizeVector\Vertex.vs" />
+    <None Include="GLSL\Model\Fragment.fs" />
+    <None Include="GLSL\Model\ReflectiveFragment.fs" />
+    <None Include="GLSL\Model\Vertex.vs" />
     <None Include="GLSL\Outline.fs" />
+    <None Include="GLSL\PostProcessing\Fragment.fs" />
+    <None Include="GLSL\PostProcessing\Vertex.vs" />
+    <None Include="GLSL\Reflection\Fragment.fs" />
+    <None Include="GLSL\Reflection\Vertex.vs" />
+    <None Include="GLSL\Skybox\Fragment.fs" />
+    <None Include="GLSL\Skybox\Vertex.vs" />
+    <None Include="GLSL\Vertex.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Texture\brick.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

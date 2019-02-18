@@ -125,7 +125,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	float yoffset = lastY - ypos;
 	lastX = xpos;
 	lastY = ypos;
-	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.1);
+	cam.ProcessMouseMovement(xoffset, yoffset, false, 0.1);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)

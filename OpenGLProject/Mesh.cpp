@@ -40,16 +40,19 @@ void Mesh::Draw(Shader &shader)
 {
     unsigned int diffuseNum = 1;
     unsigned int specularNum = 1;
+	unsigned int reflectNum = 1;
     for(unsigned int i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
         // retrieve texture number (the N in diffuseN)
         std::string number;
         std::string name = textures[i].typeName;
-        if(name == "diffuse")
-            number = std::to_string(diffuseNum++);
-        else if(name == "specular")
-            number = std::to_string(specularNum++);
+		if (name == "diffuse")
+			number = std::to_string(diffuseNum++);
+		else if (name == "specular")
+			number = std::to_string(specularNum++);
+		else if (name == "ambient")
+			number = std::to_string(reflectNum++);
 
 		glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
 	

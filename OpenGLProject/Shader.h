@@ -15,7 +15,7 @@ public:
 	unsigned int ID;
 
 	// constructor reads and builds the shader
-	Shader(const std::string &vertexPath, const std::string &fragmentPath);
+	Shader(const std::string &vertexPath, const std::string &fragmentPath, const std::string &geometryPath="");
 	// use/activate the shader
 	void use();
 	// utility uniform functions
@@ -25,6 +25,7 @@ public:
 	void setMat4fv(const std::string &name, GLsizei count,GLboolean transpose,const glm::mat4 &mat)const;
 	void setVec3(const std::string &name, float x, float y, float z) const;
 	void setVec3(const std::string &name, const glm::vec3 &value) const;
+	void setUniformIndex(const std::string &name, int value) const;
 private:
 	void checkCompileErrors(unsigned int shader, std::string type);
 };

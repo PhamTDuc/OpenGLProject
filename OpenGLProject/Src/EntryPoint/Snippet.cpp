@@ -5,18 +5,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include "LoadingTexture.h"
-#include "Shader.h"
-#include "Camera.h"
-#include "Model.h"
+#include "../../LoadingTexture.h"
+#include "../../Shader.h"
+#include "../../Camera.h"
+#include "../../Model.h"
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+bool firstMouse = true;
+float lastX = 0.0f, lastY = 0.0f;
 
 float ratio = (float)4 / 3;
 Camera cam(glm::vec3(-2.0f, 1.0f, 10.0f));
+
+
 int main() {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -43,6 +48,8 @@ int main() {
 
 	glViewport(0, 0, 800, 600);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+
 
 
 	float data[] = {
@@ -175,7 +182,7 @@ int main() {
 			cubeShader.setMat4fv("model", 1, GL_FALSE, grassmodel);
 			glBindTexture(GL_TEXTURE_2D, grass);
 			glBindVertexArray(VAO[1]);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		}
 
@@ -216,4 +223,20 @@ void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.ProcessKeyboard(RIGHT, deltaTime);
 
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.1);
 }

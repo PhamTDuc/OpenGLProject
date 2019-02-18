@@ -3,7 +3,9 @@
 #include "stb_image.h"
 #include <iostream>
 #include "string"
+#include "vector"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-unsigned int loadTexture(std::string path);
+unsigned int loadTexture(const std::string &path);
+unsigned int loadCubemap(const std::vector<std::string> &faces);
 #endif

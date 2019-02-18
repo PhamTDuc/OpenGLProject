@@ -6,9 +6,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include "../../LoadingTexture.h"
-#include "Shader.h"
-#include "Camera.h"
-#include "Model.h"
+#include "../../Shader.h"
+#include "../../Camera.h"
+#include "../../Model.h"
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -46,13 +46,13 @@ int main() {
 
 	Shader shader("GLSL/Model/Vertex.vs", "GLSL/Model/Fragment.fs");
 	Shader outline("GLSL/Model/Vertex.vs", "GLSL/Outline.fs");
-	Model castle("Model/Nanosuit/nanosuit.obj");
+	auto castle=new Model("Model/Nanosuit/nanosuit.obj");
 
 	//Configure Global opengl State
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 
@@ -62,8 +62,8 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 1, 0xff);
+		glStencilMask(0xff);
 		shader.use();
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -6.0f, -4.0f));
@@ -73,10 +73,10 @@ int main() {
 		shader.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		shader.setMat4fv("projection", 1, GL_FALSE, projection);
 		shader.setMat4fv("model", 1, GL_FALSE, model);
-		castle.Draw(shader);
+		castle->Draw(shader);
 
 
-		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilFunc(GL_NOTEQUAL, 1, 0xff);
 		glStencilMask(0x00);
 		glDisable(GL_DEPTH_TEST);
 		outline.use();
@@ -84,13 +84,13 @@ int main() {
 		outline.setMat4fv("projection", 1, GL_FALSE, projection);
 		model = glm::scale(model, glm::vec3(1.004f));
 		outline.setMat4fv("model", 1, GL_FALSE, model);
-		castle.Draw(outline);
-		glStencilMask(0xFF);
+		castle->Draw(outline);
 		glEnable(GL_DEPTH_TEST);
+
 		glfwSwapBuffers(window);
 	}
 
-
+	delete castle;
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;

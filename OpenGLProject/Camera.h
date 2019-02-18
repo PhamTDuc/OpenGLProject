@@ -35,7 +35,7 @@ public:
 	glm::vec3 getPos(){
 		return p_pos;
 	}
-	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true, float MouseSensitivity = 0.2)
+	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = false, float MouseSensitivity = 0.2)
 	{
 		xoffset *= MouseSensitivity;
 		yoffset *= MouseSensitivity;

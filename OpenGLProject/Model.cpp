@@ -89,6 +89,9 @@ void Model::processNode(aiNode *node, const aiScene *scene)
        std::vector<Texture> specularMaps = loadMaterialTextures(material, 
                                            aiTextureType_SPECULAR, "specular");
        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+	   std::vector<Texture> ambientMaps = loadMaterialTextures(material,
+		   aiTextureType_AMBIENT, "ambient");
+	   textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
    } 
     return Mesh(vertices, indices, textures);
 } 
