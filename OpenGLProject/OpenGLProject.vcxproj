@@ -179,6 +179,7 @@
     <None Include="GLSL\AdvancedGLSL\Vertex.vs" />
     <None Include="GLSL\AdvancedGLSL\Fragment2.fs" />
     <None Include="GLSL\Fragment.fs" />
+    <None Include="GLSL\GeometryShader\Explode\Geometry.gs" />
     <None Include="GLSL\GeometryShader\Fragment.fs" />
     <None Include="GLSL\GeometryShader\Geometry.gs" />
     <None Include="GLSL\GeometryShader\Vertex.vs" />

@@ -73,6 +73,7 @@ int main() {
 	Shader 	shader("GLSL/GeometryShader/Vertex.vs", "GLSL/GeometryShader/Fragment.fs", "GLSL/GeometryShader/Geometry.gs");
 	Shader nanosuitShader("GLSL/Model/Vertex.vs", "GLSL/Model/ReflectiveFragment.fs");
 	Shader  normalShader("GLSL/GeometryShader/VisualizeVector/Vertex.vs", "GLSL/GeometryShader/VisualizeVector/Fragment.fs", "GLSL/GeometryShader/VisualizeVector/Geometry.gs");
+	Shader explode("GLSL/Model/Vertex.vs", "GLSL/Model/Fragment.fs", "GLSL/GeometryShader/Explode/Geometry.gs");
 	
 
 	//Load shader
@@ -107,10 +108,10 @@ int main() {
 		//Draw Nanosuit
 		glm::mat4 projection;
 		projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 200.0f);
-
-		nanosuitShader.use();
 		glm::mat4 nanosuitMat4(1.0f);
 		nanosuitMat4 = glm::scale(nanosuitMat4, glm::vec3(0.5f));
+
+		/*nanosuitShader.use();
 		nanosuitShader.setMat4fv("model", 1, GL_FALSE, nanosuitMat4);
 		nanosuitShader.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		nanosuitShader.setMat4fv("projection", 1, GL_FALSE, projection);
@@ -118,15 +119,17 @@ int main() {
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		nanosuitShader.setInt("skybox", 3);
-		nanosuit.Draw(nanosuitShader);
+		nanosuit.Draw(nanosuitShader);*/
 
 		//Draw Nanosuit Normal
-		normalShader.use();
-		normalShader.setMat4fv("model", 1, GL_FALSE, nanosuitMat4);
-		normalShader.setMat4fv("view", 1, GL_FALSE, cam.getView());
-		normalShader.setMat4fv("projection", 1, GL_FALSE, projection);
-		normalShader.setVec3("camPos", cam.getPos());
-		nanosuit.Draw(normalShader);
+		explode.use();
+		explode.setMat4fv("model", 1, GL_FALSE, nanosuitMat4);
+		explode.setMat4fv("view", 1, GL_FALSE, cam.getView());
+		explode.setMat4fv("projection", 1, GL_FALSE, projection);
+		explode.setVec3("camPos", cam.getPos());
+		explode.setFloat("time", (float)glfwGetTime());
+		nanosuit.Draw(explode);
+
 
 
 		glfwSwapBuffers(window);
