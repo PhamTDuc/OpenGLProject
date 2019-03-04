@@ -17,7 +17,6 @@ class Model
             loadModel(path);
         }
         void Draw(Shader &shader);	
-    private:
         /*  Model Data  */
         std::vector<Mesh> meshes;
         std::vector<Texture> textures_loaded; 

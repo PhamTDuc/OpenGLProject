@@ -37,7 +37,7 @@ struct SpotLight{
     vec3 diffuse;
     vec3 specular;
 
-     float constant;
+    float constant;
     float linear;
     float quadratic;
 
@@ -49,6 +49,7 @@ in vec3 FragPos;
 in vec3 Normal;  
 in vec2 TexCoords;
   
+uniform bool blinn;
 uniform vec3 viewPos;
 uniform Material material;
 uniform SpotLight light;
@@ -61,22 +62,33 @@ void main()
     // diffuse 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position-FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
+    float diff = max(dot(norm, lightDir), 0.4);
     vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;  
     
     // specular
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	float spec;
+	if (blinn)
+	{	
+		 vec3 halfDir=normalize(lightDir+viewDir);
+		 spec = pow(max(dot(norm, halfDir), 0.0), 16.0f);
+	}
+	else
+	{	
+		vec3 reflectDir = reflect(-lightDir, norm);  
+		spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0f);
+	}
+    
     vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;  
     
     // emission
-    vec3 emission = texture(material.emission, TexCoords).rgb;
+    //vec3 emission = texture(material.emission, TexCoords).rgb;
 
     // Attenuation for Pointlight and Spotlight
     float distance    = length(light.position - FragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + 
                     light.quadratic * (distance * distance));    
+
     ambient*=attenuation;
     diffuse*=attenuation;
     specular*=attenuation;
@@ -88,7 +100,7 @@ void main()
     
     diffuse  *= intensity;
     specular *= intensity;
-    vec3 result = ambient + diffuse + specular+emission;
+    vec3 result = ambient + diffuse + specular;
 
     FragColor = vec4(result, 1.0);
 } 

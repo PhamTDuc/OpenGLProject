@@ -34,8 +34,6 @@ void Model::processNode(aiNode *node, const aiScene *scene)
     for(unsigned int i = 0; i < node->mNumChildren; i++)
     {
         processNode(node->mChildren[i], scene);
-    
-        processNode(node->mChildren[i], scene);
     }
  }
 

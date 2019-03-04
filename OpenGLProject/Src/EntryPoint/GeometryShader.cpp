@@ -21,7 +21,7 @@ float ratio = (float)4 / 3;
 Camera cam(glm::vec3(-2.0f, 1.0f, 10.0f));
 
 
-int main() {
+int main(){
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

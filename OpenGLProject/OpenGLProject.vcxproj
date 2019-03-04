@@ -137,7 +137,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="LoadingTexture.cpp" />
-    <ClCompile Include="Src\EntryPoint\GeometryShader.cpp" />
+    <ClCompile Include="Src\EntryPoint\GammaCorrection.cpp" />
     <ClCompile Include="Src\imgui\imgui.cpp" />
     <ClCompile Include="Src\imgui\imgui_demo.cpp" />
     <ClCompile Include="Src\imgui\imgui_draw.cpp" />
@@ -186,6 +186,10 @@
     <None Include="GLSL\GeometryShader\VisualizeVector\Fragment.fs" />
     <None Include="GLSL\GeometryShader\VisualizeVector\Geometry.gs" />
     <None Include="GLSL\GeometryShader\VisualizeVector\Vertex.vs" />
+    <None Include="GLSL\Instancing\Fragment.fs" />
+    <None Include="GLSL\Instancing\SteriodInstance.vs" />
+    <None Include="GLSL\Instancing\Vertex.vs" />
+    <None Include="GLSL\Instancing\VertexInstance.vs" />
     <None Include="GLSL\Model\Fragment.fs" />
     <None Include="GLSL\Model\ReflectiveFragment.fs" />
     <None Include="GLSL\Model\Vertex.vs" />

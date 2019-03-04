@@ -7,6 +7,8 @@ uniform sampler2D ScreenTexture;
 out vec4 FragColor;
 
 void main(){
+	//Gamma
+	float gamma=2.2f;
 	vec4 texColor = texture(ScreenTexture, TexCoords);
 
 	// Inverse Color
@@ -50,12 +52,18 @@ void main(){
 	vec3 sampleTex[9];
     for(int i = 0; i < 9; i++)
     {
-        sampleTex[i] = vec3(texture(ScreenTexture, TexCoord.st + offsets[i]));
+        sampleTex[i] = vec3(texture(ScreenTexture, TexCoords.st + offsets[i]));
     }
     vec3 col = vec3(0.0);
     for(int i = 0; i < 9; i++)
-        col += sampleTex[i] * kernel_sharpen[i];
+        col += sampleTex[i] *kernel_blur[i];
     
+
+	//Gamma Correction using Post Processing
+	//Gamma Correction using Post Processing
+	col=pow(col,vec3(1.0f/gamma));
     FragColor = vec4(col, 1.0f);
+
+	
     
 }
