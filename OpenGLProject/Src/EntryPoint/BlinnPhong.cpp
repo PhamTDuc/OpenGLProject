@@ -149,7 +149,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		glm::vec3 lightPos(7.0f*cos((float)glfwGetTime()/2), 0.75f, 7.0f*sin((float)glfwGetTime()/2));
+		glm::vec3 lightPos(7.0f*cos((float)glfwGetTime()/2), 0.05f, 7.0f*sin((float)glfwGetTime()/2));
 		glm::mat4 light(1.0f);
 		light = glm::translate(light, lightPos);
 		light = glm::scale(light, glm::vec3(0.4f));

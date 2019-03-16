@@ -182,6 +182,8 @@ int main() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
 
+	//Enable Gamma Correction
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();

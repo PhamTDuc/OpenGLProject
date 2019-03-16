@@ -56,11 +56,12 @@ void main(){
     }
     vec3 col = vec3(0.0);
     for(int i = 0; i < 9; i++)
-        col += sampleTex[i] *kernel_blur[i];
+        col += sampleTex[i]*kernel_blur[i];
     
 
 	//Gamma Correction using Post Processing
 	//Gamma Correction using Post Processing
+	col=vec3(texColor);
 	col=pow(col,vec3(1.0f/gamma));
     FragColor = vec4(col, 1.0f);
 

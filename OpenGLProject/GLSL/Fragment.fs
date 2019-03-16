@@ -52,7 +52,7 @@ in vec2 TexCoords;
 uniform bool blinn;
 uniform vec3 viewPos;
 uniform Material material;
-uniform SpotLight light;
+uniform DirectionLight light;
 
 void main()
 {
@@ -62,7 +62,7 @@ void main()
     // diffuse 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position-FragPos);
-    float diff = max(dot(norm, lightDir), 0.4);
+    float diff = max(dot(norm, lightDir), 0.1);
     vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;  
     
     // specular
@@ -85,21 +85,21 @@ void main()
     //vec3 emission = texture(material.emission, TexCoords).rgb;
 
     // Attenuation for Pointlight and Spotlight
-    float distance    = length(light.position - FragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + 
-                    light.quadratic * (distance * distance));    
+    //float distance    = length(light.position - FragPos);
+    //float attenuation = 1.0 / (light.constant + light.linear * distance + 
+                    //light.quadratic * (distance * distance));    
 
-    ambient*=attenuation;
-    diffuse*=attenuation;
-    specular*=attenuation;
+    //ambient*=attenuation;
+    //diffuse*=attenuation;
+    //specular*=attenuation;
 
     // More attributes for Spotlight
-    float theta     = dot(-lightDir, normalize(light.direction));
-    float epsilon   = light.innerCutOff - light.outerCutOff;
-    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);    
+    //float theta     = dot(-lightDir, normalize(light.direction));
+    //float epsilon   = light.innerCutOff - light.outerCutOff;
+    //float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);    
     
-    diffuse  *= intensity;
-    specular *= intensity;
+    //diffuse  *= intensity;
+    //specular *= intensity;
     vec3 result = ambient + diffuse + specular;
 
     FragColor = vec4(result, 1.0);
