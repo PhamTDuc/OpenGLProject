@@ -176,7 +176,7 @@ int main() {
 	//Create Framebuffer for Shadow Mapping
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
-	const unsigned int SHADOW_WIDTH = 1024 * 2, SHADOW_HEIGHT = 1024 * 2;
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 	unsigned int depthCubeMap;
 	glGenTextures(1, &depthCubeMap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
@@ -218,7 +218,7 @@ int main() {
 	//Setting shader
 	groundShader.use();
 	groundShader.setVec3("light.ambient", glm::vec3(0.05f));
-	groundShader.setVec3("light.diffuse", glm::vec3(0.5f));
+	groundShader.setVec3("light.diffuse", glm::vec3(1.0f));
 	groundShader.setVec3("light.specular", glm::vec3(2.0f));
 	
 
@@ -242,13 +242,13 @@ int main() {
 		
 
 		//Change lightPos 
-		lightPos = glm::vec3(xDir,3.0f, zDir);
+		lightPos = glm::vec3(xDir,zDir, 1.0f);
 		shadowTranforms[0] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0f, -1.0f, 0.0f));
 		shadowTranforms[1] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0f, -1.0f, 0.0f));
-		shadowTranforms[2] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, -1.0f));
-		shadowTranforms[3] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
-		shadowTranforms[4] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 1.0), glm::vec3(0.0f, -1.0f, 0.0f));
-		shadowTranforms[5] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, -1.0), glm::vec3(0.0f, -1.0f, 0.0f));
+		shadowTranforms[2] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+		shadowTranforms[3] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0f, 0.0f, -1.0f));
+		shadowTranforms[5] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0f, -1.0f, 0.0f));
+		shadowTranforms[4] = shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0f, -1.0f, 0.0f));
 		depthShader.use();
 		depthShader.setMat4fv("shadowMatrices", 6, GL_FALSE,shadowTranforms[0]);
 		depthShader.setFloat("far_plane", fardist);

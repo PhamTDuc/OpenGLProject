@@ -30,16 +30,35 @@ float ShadowCalculation(vec3 fragPos)
     // get vector between fragment position and light position
     vec3 fragToLight = fragPos - light.pos;
     // use the light to fragment vector to sample from the depth map    
-    float closestDepth = texture(shadowMap,fragToLight).r;
+    float closestDepth = texture(shadowMap, fragToLight).r;
     // it is currently in linear range between [0,1]. Re-transform back to original value
     closestDepth *= far_plane;
     // now get current linear depth as the length between the fragment and light position
     float currentDepth = length(fragToLight);
     // now test for shadows
-    float bias = 0.05; 
-    float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
+    //float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
 
-	//shadow=closestDepth / far_plane;// Check ShadowMap
+	vec3 sampleOffsetDirections[20] = vec3[]
+	(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+	);   
+	float shadow = 0.0;
+	float bias   = 0.25;
+	int samples  = 20;
+	float viewDistance = length(viewPos - fragPos);
+	float diskRadius = 0.05;
+	for(int i = 0; i < samples; ++i)
+	{
+		float closestDepth = texture(shadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+		closestDepth *= far_plane;   // Undo mapping [0;1]
+		if(currentDepth - bias > closestDepth)
+			shadow += 1.0;
+}
+shadow /= float(samples);
     return shadow;
 }  
 
@@ -60,7 +79,7 @@ void main()
     // diffuse 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.pos-Position);
-    float diff = max(dot(norm, -lightDir), 0.0);
+    float diff = pow(max(dot(norm, lightDir), 0.0),2.0);
     vec3 diffuse = light.diffuse * diff ;  
 	
 	// specular
@@ -73,13 +92,12 @@ void main()
 	// combine
 
 	// Calculate result with Shadow
-	float bias=max(0.05 * (1.0 - dot(norm, lightDir)), 0.005);  
 	float shadow = ShadowCalculation(Position);       
-	vec3 result = (ambient + (1-shadow)*(diffuse + specular))*texColor;
+	vec3 result = (ambient + (1.0-shadow)*(diffuse))*texColor;
 	
 	// Calcualte result without shadow
 	//vec3 result=(ambient+diffuse+specular)*texColor;
 
-	//FragColor=vec4(vec3(shadow),1.0f); //Check ShadowMap
+	//FragColor=vec4(vec3(1.0-shadow),1.0f); //Check ShadowMap
 	FragColor = vec4(result,1.0f);
 }

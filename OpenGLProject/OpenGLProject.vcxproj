@@ -137,7 +137,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="LoadingTexture.cpp" />
-    <ClCompile Include="Src\EntryPoint\PointShadow.cpp" />
+    <ClCompile Include="Src\EntryPoint\NormalMap.cpp" />
     <ClCompile Include="Src\imgui\imgui.cpp" />
     <ClCompile Include="Src\imgui\imgui_demo.cpp" />
     <ClCompile Include="Src\imgui\imgui_draw.cpp" />
@@ -191,6 +191,7 @@
     <None Include="GLSL\Instancing\Vertex.vs" />
     <None Include="GLSL\Instancing\VertexInstance.vs" />
     <None Include="GLSL\Model\Fragment.fs" />
+    <None Include="GLSL\Model\NormalMap.fs" />
     <None Include="GLSL\Model\PointShadowFragment.fs" />
     <None Include="GLSL\Model\ReflectiveFragment.fs" />
     <None Include="GLSL\Model\Vertex.vs" />
