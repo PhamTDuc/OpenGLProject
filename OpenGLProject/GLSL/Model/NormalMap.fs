@@ -15,6 +15,9 @@ struct PointLight{
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+	float constant;
+	float linear;
+	float quadratic;
 };
 
 uniform sampler2D diffuse1;
@@ -29,28 +32,44 @@ void main()
 {    
     vec3 texColor = texture(diffuse1, TexCoords).rgb;
 	vec3 normal = texture(normalMap1,TexCoords).rgb;
-	//normal = normalize(normal * 2.0 - 1.0);
-	//normal = normalize(fs_in.TBN*normal);
+	normal = normalize(normal * 2.0 - 1.0);
+	
+
 	// ambient
     vec3 ambient = light.ambient;
     
     // diffuse 
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.pos-Position);
+    vec3 lightDir = normalize(fs_in.TBN*(light.pos-Position));
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff ;  
+    vec3 diffuse = light.diffuse*diff ;  
 	
 	// specular
-	vec3 viewDir = normalize(viewPos - Position);
+	vec3 viewDir = normalize(fs_in.TBN*(viewPos - Position));
 	vec3 reflectDir = normalize(reflect(-lightDir, normal));  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0f);
+	vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 	vec3 specular = spec*light.specular;  
 
 	// combine
 	// combine
 
-	// Calcualte result without shadow
-	vec3 result=(diffuse+ambient+specular)*texColor;
+	  // Attenuation for Pointlight and Spotlight
+    float distance    = length(light.pos - Position);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + 
+                    light.quadratic * (distance * distance));    
 
-	FragColor = vec4(normal, 1.0);
+    ambient*=attenuation;
+    diffuse*=attenuation;
+    specular*=attenuation;
+	
+
+	vec3 result;
+	// Calcualte result without shadow
+	//result=(ambient+diffuse)*texColor+specular;
+
+	//Testing normalmap 
+	result=transpose(fs_in.TBN)*normal;
+
+	FragColor = vec4(result, 1.0f);
 }

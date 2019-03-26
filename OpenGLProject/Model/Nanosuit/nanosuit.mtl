@@ -1,5 +1,5 @@
-# Blender MTL File: 'untitled.blend'
-# Material Count: 11
+# Blender MTL File: 'None'
+# Material Count: 9
 
 newmtl Arm
 Ns 225.000000
@@ -12,29 +12,6 @@ d 1.000000
 illum 2
 map_Bump arm_showroom_ddn.png
 map_Kd arm_dif.png
-
-newmtl Arm.001
-Ns 96.078443
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.0 0.0 0.0
-Ni 1.000000
-d 1.000000
-illum 2
-map_Bump arm_showroom_ddn.png
-map_Kd arm_dif.png
-map_Ks arm_showroom_spec.png
-
-newmtl Body
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.0 0.0 0.0
-Ni 1.000000
-d 1.000000
-illum 2
 
 newmtl Body.001
 Ns 96.078443
@@ -127,11 +104,10 @@ newmtl Leg.001
 Ns 96.078443
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
+Ks 0.000000 0.000000 0.000000
 Ke 0.0 0.0 0.0
 Ni 1.000000
 d 1.000000
-illum 2
+illum 1
 map_Bump leg_showroom_ddn.png
 map_Kd leg_dif.png
-map_Ks leg_showroom_spec.png

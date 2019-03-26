@@ -11,6 +11,8 @@
 #include "../../Model.h"
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+float x_g = 0.0f;
+float y_g = 0.0f;
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -76,25 +78,79 @@ int main() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
+	float postQuad[]{
+		//Left Down Triangle.
+	-1.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 0.0f, 0.0f,
+	1.0f, -1.0f, 1.0f, 0.0f,
+
+	//Up Right Triangle.
+	1.0f, -1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 0.0f, 1.0f
+	};
+	unsigned int quadVAO, quadVBO;
+	glGenBuffers(1, &quadVBO);
+	glGenVertexArrays(1, &quadVAO);
+
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(postQuad), &postQuad, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
+
 
 	glBindVertexArray(0);
 
-	Model nanosuit("Model/Nanosuit/nanosuit.obj");
 
+
+
+	unsigned int framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	//generate texture
+	unsigned int texColorBuffer;
+	glGenTextures(1, &texColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//attach to current bound framebuffer
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//using RenderBufferObject to make sure Depth testing happen
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	Model nanosuit("Model/Nanosuit/nanosuit.obj");
 	Shader shade("GLSL/Model/Vertex.vs","GLSL/Model/NormalMap.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
+	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/Fragment.fs");
 
 	unsigned int diffuse=loadTexture("Texture/brickwall.jpg");
 	unsigned int normal = loadTexture("Texture/brickwall_normal.jpg");
 
 
 	
-	glm::vec3 lightPos(0.5f,0.2f,0.1f);
 	shade.use();
-	shade.setVec3("light.pos", lightPos);
-	shade.setVec3("light.ambient", glm::vec3(0.4f));
-	shade.setVec3("light.diffuse", glm::vec3(1.0f));
-	shade.setVec3("light.specular", glm::vec3(1.0f));
+	shade.setVec3("light.ambient", glm::vec3(0.02f));
+	shade.setVec3("light.diffuse", glm::vec3(0.8f));
+	shade.setVec3("light.specular", glm::vec3(0.1f));
+	shade.setFloat("light.constant", 0.5f);
+	shade.setFloat("light.linear", 0.09f);
+	shade.setFloat("light.quadratic", 0.032f);
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -102,13 +158,17 @@ int main() {
 		glfwPollEvents();
 		processInput(window);
 		glEnable(GL_DEPTH_TEST);
-
-		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+		
+		//First Step
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 projection= glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
 
 		shade.use();
+		glm::vec3 lightPos(x_g,y_g,0.1f);
+		shade.setVec3("light.pos", lightPos);
 		glm::mat4 model(1.0f);
 		shade.setMat4fv("view", 1,GL_FALSE,cam.getView());
 		shade.setMat4fv("projection",1,GL_FALSE,projection);
@@ -139,10 +199,23 @@ int main() {
 
 		model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(0.1f));
-		model = glm::translate(model, glm::vec3(2.0f, -5.0f, 0.0f));
+		//model = glm::translate(model, glm::vec3(20.0f, -5.0f, 0.0f));
 		shade.use();
 		shade.setMat4fv("model", 1, GL_FALSE, model);
 		nanosuit.Draw(shade);
+
+
+		//Second Step
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+		postShader.use();
+		postShader.setInt("ScreenTexture", 0);
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glfwSwapBuffers(window);
 	}
@@ -179,6 +252,14 @@ void processInput(GLFWwindow *window) {
 		cam.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		y_g += 0.5*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		y_g -= 0.5*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		x_g += 0.5*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		x_g -= 0.5*deltaTime;
 
 }
 

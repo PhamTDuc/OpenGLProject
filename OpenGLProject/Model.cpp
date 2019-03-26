@@ -57,12 +57,17 @@ void Model::processNode(aiNode *node, const aiScene *scene)
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;  
+	
 
 		vector.x = mesh->mTangents[i].x;
 		vector.y = mesh->mTangents[i].y;
 		vector.z = mesh->mTangents[i].z;
 		vertex.Tangent = vector;
 
+		vector.x = mesh->mBitangents[i].x;
+		vector.y = mesh->mBitangents[i].y;
+		vector.z = mesh->mBitangents[i].z;
+		vertex.Bitangent = vector;
 
         if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
@@ -70,7 +75,8 @@ void Model::processNode(aiNode *node, const aiScene *scene)
             vec.x = mesh->mTextureCoords[0][i].x; 
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.TexCoords = vec;
-        }
+			//std::cout << vec.x << " " << vec.y<<std::endl;
+		}
         else
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);  
 
