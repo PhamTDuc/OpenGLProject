@@ -1,5 +1,5 @@
 #include "LoadingTexture.h"
-unsigned int loadTexture(const std::string &path) {
+unsigned int loadTexture(const std::string &path,bool colorData) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
@@ -9,17 +9,32 @@ unsigned int loadTexture(const std::string &path) {
 	{
 		GLenum format;
 		GLenum formatout;
-		if (nrComponents == 1) {
-			format = GL_RED;
-			formatout = GL_RED;}
-		else {
-			if (nrComponents == 3) {
+		switch (nrComponents) {
+			case 1:
+				{
+					format = GL_RED;
+					formatout = GL_RED; 
+					break;
+				}
+	
+			case 3:
+			{
 				format = GL_SRGB;
-				formatout = GL_RGB;}
-			else {
+				formatout = GL_RGB;
+				break;
+			}
+
+			default:
+			{	
 				format = GL_SRGB_ALPHA;
-				formatout = GL_RGBA;}
+				formatout = GL_RGBA;
+			}
 		}
+
+		if (!colorData)
+			format = GL_RGB;
+
+
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, formatout, GL_UNSIGNED_BYTE, data);
 		stbi_image_free(data);

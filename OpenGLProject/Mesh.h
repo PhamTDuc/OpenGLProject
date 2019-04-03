@@ -15,7 +15,7 @@ struct Vertex {
 	// tangent
 	glm::vec3 Tangent;
 	// bitangent
-	glm::vec3 Bitangent;
+	glm::vec3 BiTangent;
 };
 
 struct Texture {

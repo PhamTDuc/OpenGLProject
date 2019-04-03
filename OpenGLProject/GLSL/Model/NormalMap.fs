@@ -2,12 +2,12 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-in vec3 Position;
-in vec3 Normal;  
+in vec3 FragPos;
+in vec3 N;  
   
 in VS_OUT{
 	//vec2 texCoords;
-	vec4 FragPosLightSpace;
+	vec3 T;
 	mat3 TBN;
 } fs_in;
 struct PointLight{
@@ -32,20 +32,20 @@ void main()
 {    
     vec3 texColor = texture(diffuse1, TexCoords).rgb;
 	vec3 normal = texture(normalMap1,TexCoords).rgb;
-	normal = normalize(normal * 2.0 - 1.0);
+	normal = normalize(normal*2.0f -1.0f);
+	normal=normalize(fs_in.TBN*normal);
 	
 
 	// ambient
     vec3 ambient = light.ambient;
     
     // diffuse 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(fs_in.TBN*(light.pos-Position));
-    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 lightDir = normalize(light.pos-FragPos);
+    float diff = max(dot(normal,lightDir), 0.0);
     vec3 diffuse = light.diffuse*diff ;  
 	
 	// specular
-	vec3 viewDir = normalize(fs_in.TBN*(viewPos - Position));
+	vec3 viewDir = normalize(viewPos-FragPos);
 	vec3 reflectDir = normalize(reflect(-lightDir, normal));  
 	vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
@@ -55,7 +55,7 @@ void main()
 	// combine
 
 	  // Attenuation for Pointlight and Spotlight
-    float distance    = length(light.pos - Position);
+    float distance    = length(light.pos - FragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + 
                     light.quadratic * (distance * distance));    
 
@@ -66,10 +66,11 @@ void main()
 
 	vec3 result;
 	// Calcualte result without shadow
-	//result=(ambient+diffuse)*texColor+specular;
+	result=(ambient+diffuse)*texColor+specular;
 
 	//Testing normalmap 
-	result=transpose(fs_in.TBN)*normal;
+	//result=fs_in.T*0.5+0.5, 1.0f;
 
-	FragColor = vec4(result, 1.0f);
+	
+	FragColor = vec4(specular, 1.0f);
 }

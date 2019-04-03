@@ -364,9 +364,9 @@ void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.ProcessKeyboard(RIGHT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		zDir -= 10 * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		zDir += 10 * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		zDir -= 10 * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 		xDir -= 10 * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)

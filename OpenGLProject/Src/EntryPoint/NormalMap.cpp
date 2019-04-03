@@ -134,7 +134,11 @@ int main() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-	Model nanosuit("Model/Nanosuit/nanosuit.obj");
+	Model plane("Model/Plane/Plane.obj");
+	//Model sphere("Model/Sphere/Sphere.obj");
+	Model cube("Model/Plane/Cube.obj");
+
+
 	Shader shade("GLSL/Model/Vertex.vs","GLSL/Model/NormalMap.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
 	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/Fragment.fs");
@@ -164,10 +168,10 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 projection= glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
+		glm::mat4 projection= glm::perspective(glm::radians(35.0f), ratio, 0.1f, 100.0f);
 
 		shade.use();
-		glm::vec3 lightPos(x_g,y_g,0.1f);
+		glm::vec3 lightPos(x_g,y_g,1.0f);
 		shade.setVec3("light.pos", lightPos);
 		glm::mat4 model(1.0f);
 		shade.setMat4fv("view", 1,GL_FALSE,cam.getView());
@@ -175,34 +179,40 @@ int main() {
 		shade.setMat4fv("model",1, GL_FALSE, model);
 		shade.setVec3("viewPos", cam.getPos());
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuse);
+		//glBindTexture(GL_TEXTURE_2D, diffuse);
 		shade.setInt("diffuse1", 0);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normal);
+		//glBindTexture(GL_TEXTURE_2D, normal);
 		shade.setInt("normalMap1", 1);
-
-		glBindVertexArray(VAO[0]);
-		//glDrawArrays(GL_TRIANGLES, 0,6);
 
 
 
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model,lightPos);
-		model = glm::scale(model, glm::vec3(0.05f));
+		//model = glm::scale(model, glm::vec3(0.5f));
 		light.use();
 		light.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		light.setMat4fv("projection", 1, GL_FALSE, projection);
 		light.setMat4fv("model", 1, GL_FALSE, model);
-		glBindVertexArray(VAO[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		//glBindVertexArray(VAO[0]);
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		cube.Draw(light);
 
 		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f));
-		//model = glm::translate(model, glm::vec3(20.0f, -5.0f, 0.0f));
+		//model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		//model= glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//model = glm::scale(model, glm::vec3(3.0f));
 		shade.use();
 		shade.setMat4fv("model", 1, GL_FALSE, model);
-		nanosuit.Draw(shade);
+		plane.Draw(shade);
+
+		glm::mat4 sphere_model(1.0f);
+		sphere_model = glm::scale(sphere_model, glm::vec3(0.4f));
+		sphere_model = glm::translate(sphere_model, glm::vec3(2.0f, 2.0f, -2.0f));
+		shade.use();
+		shade.setMat4fv("model", 1, GL_FALSE, sphere_model);
+		//sphere.Draw(shade);
 
 
 		//Second Step

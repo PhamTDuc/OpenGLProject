@@ -192,6 +192,7 @@
     <None Include="GLSL\Instancing\VertexInstance.vs" />
     <None Include="GLSL\Model\Fragment.fs" />
     <None Include="GLSL\Model\NormalMap.fs" />
+    <None Include="GLSL\Model\ParallaxMap.fs" />
     <None Include="GLSL\Model\PointShadowFragment.fs" />
     <None Include="GLSL\Model\ReflectiveFragment.fs" />
     <None Include="GLSL\Model\Vertex.vs" />

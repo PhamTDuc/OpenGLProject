@@ -6,11 +6,11 @@ layout (location = 3) in vec3 aTangent;
 layout (location = 4) in vec3 aBiTangent;
  
 out vec2 TexCoords;
-out vec3 Position;
-out vec3 Normal;
+out vec3 FragPos;
+out vec3 N;
 out VS_OUT{
 	//vec2 texCoords;
-	vec4 FragPosLightSpace;
+	vec3 T;
 	mat3 TBN;
 } vs_out;
 uniform mat4 model;
@@ -21,17 +21,33 @@ uniform mat4 lightSpaceMatrix;
 void main()
 {
     TexCoords = aTexCoords;    
-    Position=vec3(model * vec4(aPos, 1.0));
-	Normal=mat3(transpose(inverse(model))) *aNormal;
-	gl_Position = projection * view * model * vec4(aPos, 1.0f);
-	vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
+    FragPos=vec3(model * vec4(aPos, 1.0f));
+
+
+	
+	//vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
 	//gs_out.texCoords=aTexCoords;
 
 
-	vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
-	vec3 B = normalize(vec3(model * vec4(aBiTangent, 0.0)));
-	if (dot(cross(Normal, T), B) < 0.0)
-		T = -T;
-	vs_out.TBN=transpose(mat3(T,B,Normal));
+	mat3 normalMatrix=mat3(transpose(inverse(model)));
+	N      = normalize(normalMatrix * aNormal);
+	vec3 T = normalize(normalMatrix * aTangent);
+	vec3 B = normalize(normalMatrix * aBiTangent);
 
+	
+	
+	//T = normalize(T - dot(T, N) * N);
+	//then retrieve perpendicular vector B with the cross product of T and N
+	//B = cross(N, T);
+	// re-orthogonalize T with respect to N
+	//if (dot(cross(T,B ), N) < 0.0f){
+	//	B=-B;
+	//}
+
+	
+	vs_out.T=B;
+
+	vs_out.TBN=mat3(-T,B,N);
+
+	gl_Position = projection * view * model * vec4(aPos, 1.0f);
 }

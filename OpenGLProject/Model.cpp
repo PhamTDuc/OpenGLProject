@@ -57,6 +57,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;  
+		std::cout << vector.x << ":" << vector.y << ":" << vector.z << std::endl;
 	
 
 		vector.x = mesh->mTangents[i].x;
@@ -67,7 +68,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 		vector.x = mesh->mBitangents[i].x;
 		vector.y = mesh->mBitangents[i].y;
 		vector.z = mesh->mBitangents[i].z;
-		vertex.Bitangent = vector;
+		vertex.BiTangent = vector;
 
         if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
@@ -103,13 +104,13 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 		   aiTextureType_AMBIENT, "ambient");
 	   textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
 
-	   std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normalMap");
+	   std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normalMap",false);
 	   textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
    } 
     return Mesh(vertices, indices, textures);
 } 
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial *material, aiTextureType type, std::string typeName)
+std::vector<Texture> Model::loadMaterialTextures(aiMaterial *material, aiTextureType type, std::string typeName,bool colorData)
 {
     std::vector<Texture> textures;
     for(unsigned int i = 0; i < material->GetTextureCount(type); i++)
@@ -131,7 +132,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *material, aiTexture
             Texture texture;
             std::string rel_path(str.C_Str());
             std::string abs_path=this->directory+"/"+rel_path;
-            texture.id = loadTexture(abs_path);
+            texture.id = loadTexture(abs_path,colorData);
             texture.typeName = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
