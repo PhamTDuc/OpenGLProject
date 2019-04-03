@@ -10,7 +10,7 @@
 *.userprefs
 
 
-!/OpenGLProject/Model/
+!/OpenGLProject/Model/*.obj
 
 # Build results
 [Dd]ebug/
