@@ -10,7 +10,7 @@ out vec3 FragPos;
 out vec3 N;
 out VS_OUT{
 	//vec2 texCoords;
-	vec3 T;
+	//vec3 T;
 	mat3 TBN;
 } vs_out;
 uniform mat4 model;
@@ -40,14 +40,14 @@ void main()
 	//then retrieve perpendicular vector B with the cross product of T and N
 	//B = cross(N, T);
 	// re-orthogonalize T with respect to N
-	//if (dot(cross(T,B ), N) < 0.0f){
-	//	B=-B;
+	//if (dot(cross(T,B), N) < 0.0f){
+	//	T=-T;
 	//}
 
 	
-	vs_out.T=B;
+	//vs_out.T=B;
 
-	vs_out.TBN=mat3(-T,B,N);
+	vs_out.TBN=mat3(T,B,N);
 
 	gl_Position = projection * view * model * vec4(aPos, 1.0f);
 }

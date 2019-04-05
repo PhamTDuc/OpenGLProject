@@ -57,7 +57,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;  
-		std::cout << vector.x << ":" << vector.y << ":" << vector.z << std::endl;
+		//std::cout << vector.x << ":" << vector.y << ":" << vector.z << std::endl;
 	
 
 		vector.x = mesh->mTangents[i].x;

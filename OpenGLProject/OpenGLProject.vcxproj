@@ -137,7 +137,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="LoadingTexture.cpp" />
-    <ClCompile Include="Src\EntryPoint\NormalMap.cpp" />
+    <ClCompile Include="Src\EntryPoint\Bloom.cpp" />
     <ClCompile Include="Src\imgui\imgui.cpp" />
     <ClCompile Include="Src\imgui\imgui_demo.cpp" />
     <ClCompile Include="Src\imgui\imgui_draw.cpp" />
@@ -197,8 +197,11 @@
     <None Include="GLSL\Model\ReflectiveFragment.fs" />
     <None Include="GLSL\Model\Vertex.vs" />
     <None Include="GLSL\Outline.fs" />
+    <None Include="GLSL\PostProcessing\Bloom.fs" />
     <None Include="GLSL\PostProcessing\Fragment.fs" />
     <None Include="GLSL\PostProcessing\FragmentDepthMap.fs" />
+    <None Include="GLSL\PostProcessing\GaussianBlur.fs" />
+    <None Include="GLSL\PostProcessing\ToneMapping.fs" />
     <None Include="GLSL\PostProcessing\Vertex.vs" />
     <None Include="GLSL\Reflection\Fragment.fs" />
     <None Include="GLSL\Reflection\Vertex.vs" />

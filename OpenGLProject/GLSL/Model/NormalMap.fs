@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 in vec2 TexCoords;
 in vec3 FragPos;
@@ -7,7 +8,7 @@ in vec3 N;
   
 in VS_OUT{
 	//vec2 texCoords;
-	vec3 T;
+	//vec3 T;
 	mat3 TBN;
 } fs_in;
 struct PointLight{
@@ -32,12 +33,12 @@ void main()
 {    
     vec3 texColor = texture(diffuse1, TexCoords).rgb;
 	vec3 normal = texture(normalMap1,TexCoords).rgb;
-	normal = normalize(normal*2.0f -1.0f);
+	normal = normal*2.0f -1.0f;
 	normal=normalize(fs_in.TBN*normal);
 	
 
 	// ambient
-    vec3 ambient = light.ambient;
+    vec3 ambient = vec3(0.0f);
     
     // diffuse 
     vec3 lightDir = normalize(light.pos-FragPos);
@@ -68,9 +69,16 @@ void main()
 	// Calcualte result without shadow
 	result=(ambient+diffuse)*texColor+specular;
 
-	//Testing normalmap 
-	//result=fs_in.T*0.5+0.5, 1.0f;
+	
 
 	
-	FragColor = vec4(specular, 1.0f);
+	FragColor = vec4(result, 1.0f);
+
+	//For bloom Effect
+	//For bloom Effect
+	float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 12.0f)
+        BrightColor = vec4(FragColor.rgb, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

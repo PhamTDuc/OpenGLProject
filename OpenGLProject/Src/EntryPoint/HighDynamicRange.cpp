@@ -100,8 +100,6 @@ int main() {
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
-
-
 	glBindVertexArray(0);
 
 
@@ -115,7 +113,7 @@ int main() {
 	unsigned int texColorBuffer;
 	glGenTextures(1, &texColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//attach to current bound framebuffer
@@ -135,20 +133,19 @@ int main() {
 
 
 	Model plane("Model/Plane/Plane.obj");
-	Model wood("Model/Plane/Wood.obj");
-	Model nanosuit("Model/Nanosuit/nanosuit.obj");
+	//Model wood("Model/Plane/Wood.obj");
+	Model tunnel("Model/Plane/Tunnel.obj");
 
-
-	Shader shade("GLSL/Model/Vertex.vs", "GLSL/Model/ParallaxMap.fs");
+	Shader shade("GLSL/Model/Vertex.vs", "GLSL/Model/NormalMap.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
-	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/Fragment.fs");
+	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/ToneMapping.fs");
 
-	unsigned int depthMap = loadTexture("Model/Plane/depth_map.jpg",false);
+	unsigned int depthMap = loadTexture("Model/Plane/depth_map.jpg", false);
 
 	shade.use();
 	shade.setVec3("light.ambient", glm::vec3(0.02f));
-	shade.setVec3("light.diffuse", glm::vec3(0.8f));
-	shade.setVec3("light.specular", glm::vec3(0.1f));
+	shade.setVec3("light.diffuse", glm::vec3(100.0f));
+	shade.setVec3("light.specular", glm::vec3(10.5f));
 	shade.setFloat("light.constant", 0.5f);
 	shade.setFloat("light.linear", 0.09f);
 	shade.setFloat("light.quadratic", 0.032f);
@@ -168,31 +165,31 @@ int main() {
 		glm::mat4 projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
 
 		shade.use();
-		glm::vec3 lightPos(x_g, y_g, 0.1f);
+		glm::vec3 lightPos(x_g, y_g, -3.5f);
 		shade.setVec3("light.pos", lightPos);
-	
+
 		shade.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		shade.setMat4fv("projection", 1, GL_FALSE, projection);
 		shade.setVec3("viewPos", cam.getPos());
 		glm::mat4 model_plane(1.0f);
-		model_plane = glm::translate(model_plane, glm::vec3(0.0f,0.0f,-1.0f));
-		model_plane = glm::rotate(glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
-		model_plane = glm::scale(model_plane, glm::vec3(0.2f));
+		model_plane = glm::translate(model_plane, glm::vec3(0.0f, 0.0f, -1.0f));
+		//model_plane = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model_plane = glm::scale(model_plane, glm::vec3(1.0f));
 		shade.setMat4fv("model", 1, GL_FALSE, model_plane);
 
 		//Add depth map to shade
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		shade.setInt("depthMap1", 2);
-		plane.Draw(shade);
+		tunnel.Draw(shade);
 
-	
+
 
 
 
 		glm::mat4 model_light(1.0f);
 		model_light = glm::translate(model_light, lightPos);
-		model_light = glm::scale(model_light, glm::vec3(0.1f));
+		model_light = glm::scale(model_light, glm::vec3(0.4f));
 		light.use();
 		light.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		light.setMat4fv("projection", 1, GL_FALSE, projection);
@@ -200,7 +197,7 @@ int main() {
 		glBindVertexArray(VAO[0]);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		
+
 
 
 		//Second Step

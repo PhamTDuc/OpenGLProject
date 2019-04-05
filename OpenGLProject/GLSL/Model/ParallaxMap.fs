@@ -2,12 +2,12 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-in vec3 Position;
-in vec3 Normal;  
+in vec3 FragPos;
+in vec3 N;  
   
 in VS_OUT{
 	//vec2 texCoords;
-	vec4 FragPosLightSpace;
+	//vec3 T;
 	mat3 TBN;
 } fs_in;
 struct PointLight{
@@ -27,39 +27,26 @@ uniform PointLight light;
 uniform vec3 viewPos;
 
 
-//Parallax Mapping is a great technique to boost the detail of your scene, 
-//but does come with a few artifacts you'll have to consider when using it. 
-//Most often parallax mapping is used on floor or wall-like surfaces 
-//where it's not as easy to determine the surface's outline 
-//and the viewing angle is most often roughly perpendicular to the surface. 
-//This way the artifacts of Parallax Mapping aren't as noticeable and makes it an incredibly interesting technique for boosting your objects' details.
-
-vec2 ParallaxMapping(vec2 texCoords,vec3 viewDir)
+//ParallaxMapping Implementation (usually used for ground or wall)
+//ParallaxMapping Implementation (usually used for ground or wall)
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDirTangent)
 {	
-	const float height_scale=2.0f;
-	float height =  texture(depthMap1, texCoords).r;    
-    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
-    return texCoords - p;
-}
+	const float height_scale=0.05;
+    float height =  texture(depthMap1, texCoords).r;    
+    vec2 p = viewDirTangent.xy / viewDirTangent.z * (height * height_scale);
+    //return texCoords - p;    
 
-
-vec2 SteepParallaxMapping(vec2 texCoords,vec3 viewDir){
-	const float height_scale=0.5f;
-
-
+	// number of depth layers
 	const float minLayers = 8.0;
 	const float maxLayers = 32.0;
-	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
-
-
+	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDirTangent)));
     // calculate the size of each layer
     float layerDepth = 1.0 / numLayers;
     // depth of current layer
     float currentLayerDepth = 0.0;
     // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = viewDir.xy * height_scale; 
+    vec2 P = viewDirTangent.xy * height_scale; 
     vec2 deltaTexCoords = P / numLayers;
-	
 	// get initial values
 	vec2  currentTexCoords     = texCoords;
 	float currentDepthMapValue = texture(depthMap1, currentTexCoords).r;
@@ -73,13 +60,8 @@ vec2 SteepParallaxMapping(vec2 texCoords,vec3 viewDir){
 		// get depth of next layer
 		currentLayerDepth += layerDepth;  
 	}
-	//Disable the line below to Implement Parallax Occlusion Mapping
-	//return currentTexCoords;
 
-	//Implement Parallax Occlusion Mapping
-	//Implement Parallax Occlusion Mapping
-	
-	// get texture coordinates before collision (reverse operations)
+	//return currentTexCoords; //Step ParallaxMapping
 	vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
 
 	// get depth after and before collision for linear interpolation
@@ -91,32 +73,29 @@ vec2 SteepParallaxMapping(vec2 texCoords,vec3 viewDir){
 	vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
 
 	return finalTexCoords;  
+} 
 
-
-}
 
 void main()
 {    
-	vec3 viewDir = normalize(fs_in.TBN*(viewPos - Position));
-
-	//Implement ParallaxMapping
-	//Implement ParallaxMapping
-	vec2 parallax_texCoords=TexCoords;
-	//vec2 parallax_texCoords = SteepParallaxMapping(TexCoords,  viewDir);
-	if(parallax_texCoords.x > 1.0 || parallax_texCoords.y > 1.0 || parallax_texCoords.x < 0.0 || parallax_texCoords.y < 0.0)
+	vec3 viewDir = normalize(viewPos-FragPos);
+	vec3 viewDirTangent=transpose(fs_in.TBN)*viewDir;
+	vec2 texCoords=ParallaxMapping(TexCoords, viewDirTangent);
+	if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
 		discard;
-    vec3 texColor = texture(diffuse1, parallax_texCoords).rgb;
-	vec3 normal = texture(normalMap1,parallax_texCoords).rgb;
-	normal = normalize(normal * 2.0 - 1.0);
+
+    vec3 texColor = texture(diffuse1, texCoords).rgb;
+	vec3 normal = texture(normalMap1,texCoords).rgb;
+	normal = normal*2.0f -1.0f;
+	normal=normalize(fs_in.TBN*normal);
 	
 
 	// ambient
-    vec3 ambient = light.ambient;
+    vec3 ambient = vec3(0.0f);
     
     // diffuse 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(fs_in.TBN*(light.pos-Position));
-    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 lightDir = normalize(light.pos-FragPos);
+    float diff = max(dot(normal,lightDir), 0.0f);
     vec3 diffuse = light.diffuse*diff ;  
 	
 	// specular
@@ -129,7 +108,7 @@ void main()
 	// combine
 
 	  // Attenuation for Pointlight and Spotlight
-    float distance    = length(light.pos - Position);
+    float distance    = length(light.pos - FragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + 
                     light.quadratic * (distance * distance));    
 
@@ -142,8 +121,11 @@ void main()
 	// Calcualte result without shadow
 	result=(ambient+diffuse)*texColor+specular;
 
-	//Testing normalmap 
-	//result=transpose(fs_in.TBN)*normal;
+	
 
+	
 	FragColor = vec4(result, 1.0f);
+
+	
+
 }
