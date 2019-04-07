@@ -172,9 +172,9 @@ int main() {
 	std::uniform_real_distribution<float> disx(-4.0f, 8.0f);
 	std::uniform_real_distribution<float> disz(-5.0f, 5.0f);
 
-	float randomPos[20][2];
-	float randomLightPos[20][2];
-	for (int i = 0; i < 20; i++) {
+	float randomPos[40][2];
+	float randomLightPos[40][2];
+	for (int i = 0; i < 40; i++) {
 		randomPos[i][0] = disx(gen);
 		randomPos[i][1] = disz(gen);
 		randomLightPos[i][0] = disz(gen);
@@ -219,7 +219,7 @@ int main() {
 		//Draw Light Circle Radius
 		glStencilFunc(GL_ALWAYS, 1, 0xff);
 		glStencilMask(0xff);
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 40; i++) {
 			glm::mat4 model_light(1.0f);
 			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
 			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
@@ -249,7 +249,7 @@ int main() {
 		postShader.setInt("gPosition", 0);
 		postShader.setInt("gNormal", 1);
 		postShader.setInt("gColorSpec", 2);
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 40; i++) {
 			postShader.setVec3("lights["+ std::to_string(i) + "].pos", glm::vec3(x_g+ randomLightPos[i][1],y_g+randomLightPos[i][0]/10,0.1f));
 			postShader.setVec3("lights["+ std::to_string(i) + "].diffuse", glm::vec3(1.0f,0.5f,1.0f)*20.0f);
 			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
@@ -276,7 +276,7 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 40; i++) {
 			glm::mat4 model_light(1.0f);
 			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0]/10, 0.1f));
 			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)

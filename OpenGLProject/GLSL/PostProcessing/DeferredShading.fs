@@ -17,7 +17,7 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gColorSpec;
 uniform vec3 viewPos;
-uniform PointLight lights[2];
+uniform PointLight lights[40];
 
 
 void main(){
@@ -32,7 +32,7 @@ void main(){
 	vec3 viewDir = normalize(viewPos-FragPos);
 
 
-	for(int i = 0;i<2;i++){
+	for(int i = 0; i<40; i++){
 		float distance    = length(lights[i].pos - FragPos);
 			//Diffuse
 			vec3 lightDir = normalize(lights[i].pos - FragPos);
