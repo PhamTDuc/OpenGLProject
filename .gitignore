@@ -52,8 +52,7 @@ artifacts/
 
 
 *.obj
-#3D object
-!OpenGLProject/Model/**/*.obj
+
 *.pch
 *.pdb
 *.pgc
@@ -262,7 +261,3 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-
-
-#3D object
-!Model/**/*.obj
