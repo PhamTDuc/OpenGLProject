@@ -50,9 +50,10 @@ artifacts/
 *.ilk
 *.meta
 
+
+*.obj
 #3D object
 !Model/**/*.obj
-*.obj
 *.pch
 *.pdb
 *.pgc
