@@ -162,6 +162,7 @@ int main() {
 
 	Shader shade("GLSL/Model/Vertex.vs", "GLSL/Model/DeferredShading.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
+	Shader check("GLSL/PostProcessing/Vertex.vs", "GLSL/LightShade/Fragment.fs");
 	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/DeferredShading.fs"); 
 
 
@@ -186,11 +187,13 @@ int main() {
 		glfwPollEvents();
 		processInput(window);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 		//First Step
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
 
 
@@ -208,17 +211,33 @@ int main() {
 		}
 
 
-		//Draw Light Circle Radius
-		//Draw Light Circle Radius
-	
-
-
-
 		//Second Step
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.0f,0.0f,0.0f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		//glDisable(GL_DEPTH_TEST);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		//Draw Light Circle Radius
+		//Draw Light Circle Radius
+		glStencilFunc(GL_ALWAYS, 1, 0xff);
+		glStencilMask(0xff);
+		for (int i = 0; i < 2; i++) {
+			glm::mat4 model_light(1.0f);
+			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
+			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+			const float linear = 0.7;
+			const float quadratic = 1.8;
+			const float maxBrightness = 20.0f;
+			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
+			model_light = glm::scale(model_light, glm::vec3(radius / 50));
+			light.use();
+			light.setVec3("color", glm::vec3(1.0f, 0.5f, 1.0f));
+			light.setMat4fv("view", 1, GL_FALSE, cam.getView());
+			light.setMat4fv("projection", 1, GL_FALSE, projection);
+			light.setMat4fv("model", 1, GL_FALSE, model_light);
+			lightSphere.Draw(light);
+		}
+
+		glStencilFunc(GL_EQUAL, 1, 0xff);
+		glStencilMask(0x00);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, gPosition);
 		glActiveTexture(GL_TEXTURE1);
@@ -241,10 +260,13 @@ int main() {
 			postShader.setFloat("lights["+std::to_string(i)+"].radius",radius);
 
 		}
-
-
+		//check.use();
+		//check.setVec3("color", glm::vec3(0.0f, 1.0f, 0.0f));
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glStencilMask(0xff);
+		glStencilFunc(GL_ALWAYS, 0, 0xff);
+		glDisable(GL_STENCIL_TEST);
 
 		//Combine with forward rendering
 		//Combine with forward rendering
@@ -253,7 +275,7 @@ int main() {
 		glBlitFramebuffer(0, 0, 800, 600, 0, 0, 800, 600, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//glEnable(GL_DEPTH_TEST);
+	
 		for (int i = 0; i < 2; i++) {
 			glm::mat4 model_light(1.0f);
 			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0]/10, 0.1f));
@@ -264,7 +286,7 @@ int main() {
 			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
 			model_light = glm::scale(model_light, glm::vec3(radius/800));
 			light.use();
-			light.setVec3("color", glm::vec3(1.0f, 0.5f, 1.0f));
+			light.setVec3("color", glm::vec3(0.0f, 0.5f, 1.0f));
 			light.setMat4fv("view", 1, GL_FALSE, cam.getView());
 			light.setMat4fv("projection", 1, GL_FALSE, projection);
 			light.setMat4fv("model", 1, GL_FALSE, model_light);

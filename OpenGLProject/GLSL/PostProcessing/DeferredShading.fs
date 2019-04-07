@@ -34,7 +34,6 @@ void main(){
 
 	for(int i = 0;i<2;i++){
 		float distance    = length(lights[i].pos - FragPos);
-		if(distance<lights[i].radius){
 			//Diffuse
 			vec3 lightDir = normalize(lights[i].pos - FragPos);
 			float diff= max(dot(Normal, lightDir), 0.0f);
@@ -52,7 +51,6 @@ void main(){
 			spec*=attenuation;
 			diffuse += lights[i].diffuse*diff;
 			specular+=vec3(spec*Specular);
-		}
 	}
 
 	vec3 result;
