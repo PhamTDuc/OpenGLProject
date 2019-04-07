@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -54,7 +55,6 @@ int main() {
 
 
 
-
 	float transparentVertices[] = {
 		// positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
 		0.0f,  0.5f,  0.0f,  0.0f, 0.0f, 1.0f,  0.0f,  0.0f,
@@ -104,27 +104,43 @@ int main() {
 
 
 
+	//Create GBuffer object
+	//Create GBuffer object
+	unsigned int gBuffer;
+	glGenFramebuffers(1, &gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	unsigned int gPosition, gNormal, gColorSpec;
 
-	unsigned int framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	// - position color buffer
+	glGenTextures(1, &gPosition);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//generate texture
-	unsigned int texColorBuffer[2];
-	glGenTextures(2, texColorBuffer);
-	for (int i = 0; i < 2; i++) {
-		glBindTexture(GL_TEXTURE_2D, texColorBuffer[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//attach to current bound framebuffer
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, texColorBuffer[i], 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachments);  
+	// - normal color buffer
+	glGenTextures(1, &gNormal);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// - color + specular color buffer
+	glGenTextures(1, &gColorSpec);
+	glBindTexture(GL_TEXTURE_2D, gColorSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gColorSpec, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
 
 	//using RenderBufferObject to make sure Depth testing happen
 	unsigned int rbo;
@@ -134,27 +150,6 @@ int main() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 
-	//Pingpongfbo
-	unsigned int pingpongFBO[2];
-	unsigned int pingpongBuffer[2];
-	glGenFramebuffers(2, pingpongFBO);
-	glGenTextures(2, pingpongBuffer);
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-		glBindTexture(GL_TEXTURE_2D, pingpongBuffer[i]);
-		glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL
-		);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(
-			GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongBuffer[i], 0
-		);
-	}
-	
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -162,26 +157,30 @@ int main() {
 
 
 
-	Model plane("Model/Plane/Plane.obj");
-	//Model wood("Model/Plane/Wood.obj");
 	Model nanosuit("Model/Nanosuit/nanosuit.obj");
+	Model lightSphere("Model/Sphere/LightSphere.obj");
 
-	Shader shade("GLSL/Model/Vertex.vs", "GLSL/Model/NormalMap.fs");
+	Shader shade("GLSL/Model/Vertex.vs", "GLSL/Model/DeferredShading.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
-	Shader blurShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/GaussianBlur.fs");
-	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/Bloom.fs");
-
-	unsigned int depthMap = loadTexture("Model/Plane/depth_map.jpg", false);
-
-	shade.use();
-	shade.setVec3("light.ambient", glm::vec3(0.02f));
-	shade.setVec3("light.diffuse", glm::vec3(5.0f,6.0f,8.0f));
-	shade.setVec3("light.specular", glm::vec3(8.0f,10.0f,10.0f));
-	shade.setFloat("light.constant", 0.5f);
-	shade.setFloat("light.linear", 0.09f);
-	shade.setFloat("light.quadratic", 0.032f);
+	Shader postShader("GLSL/PostProcessing/Vertex.vs", "GLSL/PostProcessing/DeferredShading.fs"); 
 
 
+	//Generate random number;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> disx(-4.0f, 8.0f);
+	std::uniform_real_distribution<float> disz(-5.0f, 5.0f);
+
+	float randomPos[20][2];
+	float randomLightPos[20][2];
+	for (int i = 0; i < 20; i++) {
+		randomPos[i][0] = disx(gen);
+		randomPos[i][1] = disz(gen);
+		randomLightPos[i][0] = disz(gen);
+		randomLightPos[i][1] = disx(gen);
+	}
+
+	glm::mat4 projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
@@ -189,79 +188,88 @@ int main() {
 		glEnable(GL_DEPTH_TEST);
 
 		//First Step
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
+
 
 		shade.use();
-		glm::vec3 lightPos(x_g, y_g, 0.5f);
-		shade.setVec3("light.pos", lightPos);
-
 		shade.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		shade.setMat4fv("projection", 1, GL_FALSE, projection);
-		shade.setVec3("viewPos", cam.getPos());
-		glm::mat4 model_plane(1.0f);
-		model_plane = glm::translate(model_plane, glm::vec3(0.0f, 0.0f, -1.0f));
-		//model_plane = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model_plane = glm::scale(model_plane, glm::vec3(0.2f));
-		shade.setMat4fv("model", 1, GL_FALSE, model_plane);
 
-		//Add depth map to shade
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		shade.setInt("depthMap1", 2);
-		nanosuit.Draw(shade);
-
-
-
-
-
-		glm::mat4 model_light(1.0f);
-		model_light = glm::translate(model_light, lightPos);
-		model_light = glm::scale(model_light, glm::vec3(0.4f));
-		light.use();
-		light.setMat4fv("view", 1, GL_FALSE, cam.getView());
-		light.setMat4fv("projection", 1, GL_FALSE, projection);
-		light.setMat4fv("model", 1, GL_FALSE, model_light);
-		glBindVertexArray(VAO[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-
-		//Implement blur effect
-		//Implement blur effect
-		bool horizontal = true, first_iteration = true;
-		int amount = 4;
-		blurShader.use();
-		for (unsigned int i = 0; i < amount; i++)
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-			blurShader.setBool("horizontal", horizontal);
-			glBindTexture(GL_TEXTURE_2D, first_iteration ? texColorBuffer[1] : pingpongBuffer[!horizontal]);
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			horizontal = !horizontal;
-			if (first_iteration)
-				first_iteration = false;
+		for (int i = 0; i < 20; i++) {
+			glm::mat4 model_plane(1.0f);
+			model_plane = glm::translate(model_plane, glm::vec3(randomPos[i][0], 0.0f,randomPos[i][1]));
+			//model_plane = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model_plane = glm::scale(model_plane, glm::vec3(0.2f));
+			shade.setMat4fv("model", 1, GL_FALSE, model_plane);
+			nanosuit.Draw(shade);
 		}
+
+
+		//Draw Light Circle Radius
+		//Draw Light Circle Radius
+	
+
 
 
 		//Second Step
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f,0.0f,0.0f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_DEPTH_TEST);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texColorBuffer[0]);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, pingpongBuffer[1]);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, gColorSpec);
 		postShader.use();
-		postShader.setInt("ScreenTexture", 0);
-		postShader.setInt("BloomTexture", 1);
+		postShader.setVec3("viewPos", cam.getPos());
+		postShader.setInt("gPosition", 0);
+		postShader.setInt("gNormal", 1);
+		postShader.setInt("gColorSpec", 2);
+		for (int i = 0; i < 2; i++) {
+			postShader.setVec3("lights["+ std::to_string(i) + "].pos", glm::vec3(x_g+ randomLightPos[i][1],y_g+randomLightPos[i][0]/10,0.1f));
+			postShader.setVec3("lights["+ std::to_string(i) + "].diffuse", glm::vec3(1.0f,0.5f,1.0f)*20.0f);
+			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+			const float linear = 0.7;
+			const float quadratic = 1.8;
+			const float maxBrightness = 20.0f;
+			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
+			postShader.setFloat("lights["+std::to_string(i)+"].radius",radius);
+
+		}
+
+
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//Combine with forward rendering
+		//Combine with forward rendering
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+		glBlitFramebuffer(0, 0, 800, 600, 0, 0, 800, 600, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		//glEnable(GL_DEPTH_TEST);
+		for (int i = 0; i < 2; i++) {
+			glm::mat4 model_light(1.0f);
+			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0]/10, 0.1f));
+			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+			const float linear = 0.7;
+			const float quadratic = 1.8;
+			const float maxBrightness = 20.0f;
+			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
+			model_light = glm::scale(model_light, glm::vec3(radius/800));
+			light.use();
+			light.setVec3("color", glm::vec3(1.0f, 0.5f, 1.0f));
+			light.setMat4fv("view", 1, GL_FALSE, cam.getView());
+			light.setMat4fv("projection", 1, GL_FALSE, projection);
+			light.setMat4fv("model", 1, GL_FALSE, model_light);
+			lightSphere.Draw(light);
+		}	
 
 		glfwSwapBuffers(window);
 	}

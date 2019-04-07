@@ -38,11 +38,11 @@ void main()
 	
 	//T = normalize(T - dot(T, N) * N);
 	//then retrieve perpendicular vector B with the cross product of T and N
-	//B = cross(N, T);
+	//B = cross(T, N);
 	// re-orthogonalize T with respect to N
-	//if (dot(cross(T,B), N) < 0.0f){
-	//	T=-T;
-	//}
+	if (dot(cross(T,B), N) < 0.0f){
+		T=-T;
+	}
 
 	
 	//vs_out.T=B;
