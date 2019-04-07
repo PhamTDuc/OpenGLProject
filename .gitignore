@@ -53,7 +53,7 @@ artifacts/
 
 *.obj
 #3D object
-!Model/**/*.obj
+!OpenGLProject/Model/**/*.obj
 *.pch
 *.pdb
 *.pgc
