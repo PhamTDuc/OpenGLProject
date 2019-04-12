@@ -46,7 +46,7 @@ void main(){
 
 			//Attenuation
 			float attenuation = 1.0 / (0.7f + 1.8 * distance + 
-						10.0 * (distance * distance));    
+						20.0 * (distance * distance));    
 			diff*=attenuation;
 			spec*=attenuation;
 			diffuse += lights[i].diffuse*diff;

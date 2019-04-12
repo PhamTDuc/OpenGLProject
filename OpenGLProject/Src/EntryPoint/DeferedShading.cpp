@@ -218,7 +218,8 @@ int main() {
 		//Draw Light Circle Radius
 		//Draw Light Circle Radius
 		glStencilFunc(GL_ALWAYS, 1, 0xff);
-		glStencilMask(0xff);
+		glStencilMask(0xff);	
+		glDisable(GL_DEPTH_TEST);
 		for (int i = 0; i < 40; i++) {
 			glm::mat4 model_light(1.0f);
 			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
@@ -227,7 +228,7 @@ int main() {
 			const float quadratic = 1.8;
 			const float maxBrightness = 20.0f;
 			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
-			model_light = glm::scale(model_light, glm::vec3(radius / 50));
+			model_light = glm::scale(model_light, glm::vec3(radius / 20));
 			light.use();
 			light.setVec3("color", glm::vec3(1.0f, 0.5f, 1.0f));
 			light.setMat4fv("view", 1, GL_FALSE, cam.getView());
@@ -235,7 +236,7 @@ int main() {
 			light.setMat4fv("model", 1, GL_FALSE, model_light);
 			lightSphere.Draw(light);
 		}
-
+		glEnable(GL_DEPTH_TEST);
 		glStencilFunc(GL_EQUAL, 1, 0xff);
 		glStencilMask(0x00);
 		glActiveTexture(GL_TEXTURE0);
@@ -251,7 +252,7 @@ int main() {
 		postShader.setInt("gColorSpec", 2);
 		for (int i = 0; i < 40; i++) {
 			postShader.setVec3("lights["+ std::to_string(i) + "].pos", glm::vec3(x_g+ randomLightPos[i][1],y_g+randomLightPos[i][0]/10,0.1f));
-			postShader.setVec3("lights["+ std::to_string(i) + "].diffuse", glm::vec3(1.0f,0.5f,1.0f)*20.0f);
+			postShader.setVec3("lights["+ std::to_string(i) + "].diffuse", glm::vec3(1.0f,0.5f,1.0f)*80.0f);
 			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
 			const float linear = 0.7;
 			const float quadratic = 1.8;
