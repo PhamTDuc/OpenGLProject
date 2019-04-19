@@ -1,5 +1,116 @@
 # Blender MTL File: 'None'
-# Material Count: 1
+# Material Count: 10
+
+newmtl Arm
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\arm_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\arm_dif.png
+
+newmtl Body.001
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\body_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\body_dif.png
+map_Ks C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\body_showroom_spec.png
+
+newmtl Glass
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\glass_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\glass_dif.png
+
+newmtl Glass.001
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\glass_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\glass_dif.png
+
+newmtl Hand
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\hand_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\hand_dif.png
+
+newmtl Hand.001
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\hand_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\hand_dif.png
+map_Ks C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\hand_showroom_spec.png
+
+newmtl Helmet
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\helmet_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\helmet_diff.png
+
+newmtl Helmet.001
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\helmet_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\helmet_diff.png
+map_Ks C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\helmet_showroom_spec.png
+
+newmtl Leg.001
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+illum 1
+map_Bump C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\leg_showroom_ddn.png
+map_Kd C:\\Users\\APC\\Desktop\\OpenGLProject\\OpenGLProject\\Model\\Nanosuit\\leg_dif.png
 
 newmtl Material.001
 Ns 225.000000

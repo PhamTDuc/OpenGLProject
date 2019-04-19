@@ -30,6 +30,8 @@ void main(){
 	vec3 diffuse = vec3(0.0f);
 	vec3 specular = vec3(0.0f);
 	vec3 viewDir = normalize(viewPos-FragPos);
+	
+
 
 
 	for(int i = 0; i<4; i++){

@@ -216,7 +216,7 @@ int main() {
 		randomLightPos[i][1] = disx(gen);
 	}
 
-	
+
 	//SSAO samples oriented Generator
 	//SSAO samples oriented Generator
 	glm::vec3 ssaoKernel[64];
@@ -232,7 +232,7 @@ int main() {
 		float scale = (float)i / 64.0;
 		scale = lerp(0.1f, 1.0f, scale * scale);
 		sample *= scale;
-		ssaoKernel[i]=sample;
+		ssaoKernel[i] = sample;
 	}
 
 	glm::vec3 ssaoNoise[16];
@@ -286,29 +286,7 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		//Draw Light Circle Radius
-		//Draw Light Circle Radius
-		//glStencilFunc(GL_ALWAYS, 1, 0xff);
-		//glStencilMask(0xff);
-		//glDisable(GL_DEPTH_TEST);
-		//for (int i = 0; i < 4; i++) {
-		//	glm::mat4 model_light(1.0f);
-		//	model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
-		//	const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-		//	const float linear = 0.7;
-		//	const float quadratic = 1.8;
-		//	const float maxBrightness = 200.0f;
-		//	float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
-		//	model_light = glm::scale(model_light, glm::vec3(radius / 20));
-		//	light.use();
-		//	light.setVec3("color", glm::vec3(1.0f, 0.5f, 1.0f));
-		//	light.setMat4fv("view", 1, GL_FALSE, cam.getView());
-		//	light.setMat4fv("projection", 1, GL_FALSE, projection);
-		//	light.setMat4fv("model", 1, GL_FALSE, model_light);
-		//	lightSphere.Draw(light);
-		//}
-		//glStencilFunc(GL_EQUAL, 1, 0xff);
-		//glStencilMask(0x00);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, gPosition);
 		glActiveTexture(GL_TEXTURE1);
@@ -327,22 +305,31 @@ int main() {
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		//Blur SSAO Stage
-		//Blur SSAO Stage
+		//Blur SSAO Stage and Deferred Shading
+		//Blur SSAO Stage and Deferred Shading
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
 		ssaoFinal.use();
-		ssaoFinal.setInt("ssao", 0);
+		ssaoFinal.setInt("ssao", 4);
+		ssaoFinal.setInt("gPosition", 0);
+		ssaoFinal.setInt("gNormal", 1);
+		ssaoFinal.setMat4fv("view", 1, GL_FALSE, cam.getView());
+		for (int i = 0; i < 4; i++) {
+			ssaoFinal.setVec3("lights[" + std::to_string(i) + "].pos", glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
+			ssaoFinal.setVec3("lights[" + std::to_string(i) + "].diffuse", glm::vec3(1.0f, 0.5f, 1.0f)*8.0f);
+
+		}
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		//glStencilMask(0xff);
 		//glStencilFunc(GL_ALWAYS, 0, 0xff);
 		//glDisable(GL_STENCIL_TEST);
-		
-		
+
+
+
 
 
 
