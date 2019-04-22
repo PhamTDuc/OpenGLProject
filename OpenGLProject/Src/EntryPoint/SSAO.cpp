@@ -1,7 +1,11 @@
 #include <iostream>
 #include <random>
+#include <vector>
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,10 +14,10 @@
 #include "../../Shader.h"
 #include "../../Camera.h"
 #include "../../Model.h"
-float deltaTime = 0.0f;	// Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-float x_g = 0.0f;
-float y_g = 0.0f;
+float static deltaTime = 0.0f;	// Time between current frame and last frame
+static float lastFrame = 0.0f; // Time of last frame
+static float x_g = 0.0f;
+static float y_g = 0.0f;
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -57,7 +61,7 @@ int main() {
 
 	glViewport(0, 0, 800, 600);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
+	//glfwSetCursorPosCallback(window, mouse_callback);
 
 
 
@@ -120,7 +124,7 @@ int main() {
 	// - position color buffer
 	glGenTextures(1, &gPosition);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -131,7 +135,7 @@ int main() {
 	// - normal color buffer
 	glGenTextures(1, &gNormal);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
@@ -140,7 +144,7 @@ int main() {
 	// - color + specular color buffer
 	glGenTextures(1, &gColorSpec);
 	glBindTexture(GL_TEXTURE_2D, gColorSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gColorSpec, 0);
@@ -172,7 +176,7 @@ int main() {
 	// SSAO color buffer
 	glGenTextures(1, &ssaoColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 800, 600, 0, GL_RED, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
@@ -182,7 +186,7 @@ int main() {
 	glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
 	glGenTextures(1, &ssaoColorBufferBlur);
 	glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 800, 600, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 800, 600, 0, GL_RED, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
@@ -229,7 +233,7 @@ int main() {
 		);
 		sample = glm::normalize(sample);
 		sample *= randomFloats(gen);
-		float scale = (float)i / 64.0;
+		float scale = (float)i / 64.0f;
 		scale = lerp(0.1f, 1.0f, scale * scale);
 		sample *= scale;
 		ssaoKernel[i] = sample;
@@ -253,12 +257,60 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	
+	
+	const char patterns[] = {
+		 0, 32,  8, 40,  2, 34, 10, 42,
+		48, 16, 56, 24, 50, 18, 58, 26,
+		12, 44,  4, 36, 14, 46,  6, 38,
+		60, 28, 52, 20, 62, 30, 54, 22,
+		 3, 35, 11, 43,  1, 33,  9, 41,
+		15, 47,  7, 39, 13, 45,  5, 37,
+		63, 31, 55, 23, 61, 29, 53, 21,
+	}; //Bayer matrix
+
+	unsigned int ditherTexture;
+	glGenTextures(1, &ditherTexture);
+	glBindTexture(GL_TEXTURE_2D, ditherTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_FLOAT, &patterns[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glm::mat4 projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
+
+	//GUI parameters
+	float radius=0.1f;
+	float intensity = 0.01f;
+	float val = 1.0f;
+	glm::vec3 my_color;
+	
+	
+	// GUI
+	// GUI
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+	//Load Fonts
+	ImGuiIO& io = ImGui::GetIO();
+	ImFont* font1 = io.Fonts->AddFontDefault();
+	ImFont* font2 = io.Fonts->AddFontFromFileTTF("Fonts/DancingScript-Regular.ttf",18.0f);
+	if(!font2)
+		std::cout << "Fail to load Font from File" << std::endl;
+
 
 	while (!glfwWindowShouldClose(window)) {
 
 		glfwPollEvents();
 		processInput(window);
+		
+		//GUI
+		//GUI
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		glEnable(GL_DEPTH_TEST);
 		//glEnable(GL_STENCIL_TEST);
 		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
@@ -295,10 +347,13 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, gColorSpec);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, noiseTexture);
+	
+
 		ssaoChecker.use();
 		ssaoChecker.setInt("gPosition", 0);
 		ssaoChecker.setInt("gNormal", 1);
 		ssaoChecker.setInt("texNoise", 3);
+		ssaoChecker.setFloat("radius", radius);
 		ssaoChecker.setMat4fv("projection", 1, GL_FALSE, projection);
 		for (unsigned int i = 0; i < 64; ++i)
 			ssaoChecker.setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
@@ -312,14 +367,19 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, ditherTexture);
 		ssaoFinal.use();
 		ssaoFinal.setInt("ssao", 4);
 		ssaoFinal.setInt("gPosition", 0);
 		ssaoFinal.setInt("gNormal", 1);
+		ssaoFinal.setInt("dither", 5);
+		ssaoFinal.setFloat("intensity", intensity);
+		ssaoFinal.setFloat("val", val);
 		ssaoFinal.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		for (int i = 0; i < 4; i++) {
 			ssaoFinal.setVec3("lights[" + std::to_string(i) + "].pos", glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
-			ssaoFinal.setVec3("lights[" + std::to_string(i) + "].diffuse", glm::vec3(1.0f, 0.5f, 1.0f)*8.0f);
+			ssaoFinal.setVec3("lights[" + std::to_string(i) + "].diffuse", glm::vec3(1.0f, 0.5f, 1.0f)*4.0f);
 
 		}
 		glBindVertexArray(quadVAO);
@@ -344,9 +404,9 @@ int main() {
 		for (int i = 0; i < 4; i++) {
 			glm::mat4 model_light(1.0f);
 			model_light = glm::translate(model_light, glm::vec3(x_g + randomLightPos[i][1], y_g + randomLightPos[i][0] / 10, 0.1f));
-			const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-			const float linear = 0.7;
-			const float quadratic = 1.8;
+			const float constant = 1.0f; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+			const float linear = 0.7f;
+			const float quadratic = 1.8f;
 			const float maxBrightness = 20.0f;
 			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)));
 			model_light = glm::scale(model_light, glm::vec3(radius / 800));
@@ -358,8 +418,110 @@ int main() {
 			lightSphere.Draw(light);
 		}
 
+		//GUI
+		//GUI
+		static int currentListItemIndex = 0;
+		static int currentItemIndex = 0;
+		static bool selected[10];
+		static const char* comboItems[]={"Apple", "Banana", "Orange", "Mango", "Tangerine", "Persimmon"};
+		{
+			bool my_tool_active;
+			//Passing '&my_tool_active' displays a Close button on the upper - right corner of the window, the pointed value will be set to false when the button is pressed.
+			ImGui::Begin("Controller", &my_tool_active, ImGuiWindowFlags_MenuBar);
+			if (ImGui::BeginMenuBar())
+			{
+				if (ImGui::BeginMenu("File"))
+				{
+					if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
+					if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
+					if (ImGui::MenuItem("Close", "Ctrl+W")) { my_tool_active = false; }
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Edit"))
+				{
+					if (ImGui::MenuItem("Preferences", "Ctrl+Shift+U")) { /* Do stuff */ }
+					if (ImGui::MenuItem("Copy", "Ctrl+C")) { /* Do stuff */ }
+					if (ImGui::MenuItem("Paste", "Ctrl+V")) { /* Do stuff */ }
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenuBar();
+				
+			}
+			if (font2) 
+			{
+				ImGui::PushFont(font2);
+				ImGui::Text("CHANGE PARAMETERS");
+				ImGui::Text("CHANGE PARAMETERS");
+				ImGui::PopFont();
+			}
+			// Edit a color (stored as ~4 floats)
+			ImGui::ColorEdit3("Color", &my_color[0]);
+
+
+			// Display contents in a scrolling region
+			ImGui::TextColored(ImVec4{ my_color[0],my_color[1],my_color[2],1.0f }, "IMPORTANT STUFF");
+			ImGui::BeginChild("Scrolling", ImVec2(0, 100), true);
+			for (int n = 0; n < 5; n++)
+				ImGui::Text("%04d: Some text", n);
+			ImGui::EndChild();
+
+			ImGui::BeginChild("test", ImVec2(0, 200), true);
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::Selectable("Clear"))
+				{
+				}
+				if (ImGui::Selectable("ChangeVal"))
+				{
+				}
+				if (ImGui::Selectable("EditVal"))
+				{
+				}
+				ImGui::EndPopup();
+			}
+			
+			//Listbox and Combo
+			ImGui::ListBox("Listbox", &currentListItemIndex, comboItems, IM_ARRAYSIZE(comboItems), 4);
+			ImGui::Combo("Combobox", &currentItemIndex, comboItems, IM_ARRAYSIZE(comboItems));
+
+			//MultiSelectable Combo
+			if (ImGui::BeginCombo("MultiSelectable Combo", "")){
+				std::string preview = "";
+				for (int i = 0; i < 10; i++) {
+					ImGui::Selectable(("Item " + std::to_string(i)).c_str(),&selected[i],ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
+				}
+				
+				ImGui::EndCombo();
+			}
+
+			ImGui::EndChild();
+
+			// Plot some values
+			const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f, 2.3f, 1.0f, 4.5f, 10.0f, 6.0f, 10.5f};
+			ImGui::PlotLines("Frame Times", my_values, IM_ARRAYSIZE(my_values));
+
+			//Slider
+			ImGui::SliderFloat("ssao radius:", &radius, 0.1f, 10.0f);
+			ImGui::SliderFloat("intensity:", &intensity, 0.01f, 10.0f);
+			ImGui::SliderFloat("Dither:", &val, 1.0f, 256.0f);
+			if (!my_tool_active)
+				ImGui::Text("Hello");
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+
+
+		}
+
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
 	}
+	// Cleanup
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glDeleteVertexArrays(2, VAO);
 	glDeleteBuffers(2, VBO);
@@ -394,13 +556,13 @@ void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.ProcessKeyboard(RIGHT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		y_g += 0.75*deltaTime;
+		y_g += 0.75f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		y_g -= 0.75*deltaTime;
+		y_g -= 0.75f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		x_g += 0.75*deltaTime;
+		x_g += 0.75f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		x_g -= 0.75*deltaTime;
+		x_g -= 0.75f*deltaTime;
 
 }
 
@@ -417,5 +579,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	float yoffset = lastY - ypos;
 	lastX = xpos;
 	lastY = ypos;
-	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.1);
+	cam.ProcessMouseMovement(xoffset, yoffset, true, 0.1f);
 }

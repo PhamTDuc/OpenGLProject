@@ -9,10 +9,10 @@ uniform sampler2D gNormal;
 uniform sampler2D texNoise;
 uniform vec3 samples[64];
 uniform mat4 projection;
+uniform float radius = 0.1f;
 
 const vec2 noiseScale = vec2(800.0/4.0, 600.0/4.0);
 int kernelSize = 64;
-float radius = 0.2f;
 float bias = 0.1;
 
 void main(){

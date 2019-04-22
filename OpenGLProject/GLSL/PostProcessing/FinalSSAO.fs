@@ -12,12 +12,13 @@ out vec4 FragColor;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D ssao;
+uniform sampler2D dither;
+uniform float intensity;
+uniform float val;
+
 uniform mat4 view;
 uniform PointLight lights[4];
 const vec2 noiseScale = vec2(800.0/4.0, 600.0/4.0);
-int kernelSize = 64;
-float radius = 0.4;
-float bias = 0.045;
 
 void main(){
 	vec3 FragPos = texture(gPosition,TexCoords).rgb;
@@ -43,7 +44,7 @@ void main(){
 
 	vec3 viewDir=normalize(-FragPos);
 	for(int i = 0; i<4; i++){
-		vec4 lightpos = view*vec4(lights[i].pos,1.0f); //From world space to view space
+		vec4 lightpos = view*vec4(lights[i].pos,1.0); //From world space to view space
 		float distance    = length(lightpos.xyz - FragPos);
 			//Diffuse
 			vec3 lightDir = normalize(lightpos.xyz - FragPos);
@@ -52,7 +53,7 @@ void main(){
 			//Specular
 			vec3 reflectDir = normalize(reflect(-lightDir, Normal));  
 			vec3 halfwayDir = normalize(lightDir + viewDir);  
-			float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
+			float spec = pow(max(dot(Normal, halfwayDir), 0.0), 32.0);
 
 
 			//Attenuation
@@ -65,8 +66,12 @@ void main(){
 	}
 
 	vec3 result;
-	result=(diffuse+0.2f*ssaoVal)*vec3(0.9f,0.8f,0.9f) + specular*4.0f;
-	FragColor=vec4(result,1.0f);
+	result=(diffuse*intensity+0.1f*ssaoVal)*vec3(0.9,0.8,0.9) +specular;
 
+	FragColor=vec4(result,1.0);
+
+	//Dither
+	//dither
+	FragColor+=vec4(vec3(texture(dither,gl_FragCoord.xy*val).r / 64.0 -1.0/128.0),1.0f);
 	
 }
