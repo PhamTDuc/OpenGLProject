@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\HeaderAndLib\OpenGL\include;C:\Users\APC\Desktop\OpenGLProject\OpenGLProject\Src\imgui;$(IncludePath)</IncludePath>
+    <IncludePath>D:\HeaderAndLib\OpenGL\include;C:\Users\Administrator\Desktop\OpenGLProject\OpenGLProject\Src;$(IncludePath)</IncludePath>
     <LibraryPath>D:\HeaderAndLib\OpenGL;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\APC\Desktop\OpenGLProject\OpenGLProject\Src;D:\HeaderAndLib\OpenGL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Administrator\Desktop\OpenGLProject\OpenGLProject\Src;D:\HeaderAndLib\OpenGL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glfw3.lib;assimp-vc140-mt.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -155,7 +155,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="LoadingTexture.cpp" />
-    <ClCompile Include="Src\EntryPoint\SSAO.cpp" />
+    <ClCompile Include="Src\EntryPoint\PBRShading.cpp" />
     <ClCompile Include="Src\imgui\imgui.cpp" />
     <ClCompile Include="Src\imgui\imgui_demo.cpp" />
     <ClCompile Include="Src\imgui\imgui_draw.cpp" />
@@ -218,6 +218,7 @@
     <None Include="GLSL\Model\Vertex.vs" />
     <None Include="GLSL\Model\VertexSSAO.vs" />
     <None Include="GLSL\Outline.fs" />
+    <None Include="GLSL\PBR\Fragment.fs" />
     <None Include="GLSL\PostProcessing\Bloom.fs" />
     <None Include="GLSL\PostProcessing\DeferredShading.fs" />
     <None Include="GLSL\PostProcessing\FinalSSAO.fs" />
