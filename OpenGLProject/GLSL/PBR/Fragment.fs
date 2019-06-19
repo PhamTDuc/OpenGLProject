@@ -34,6 +34,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 	float num = a2;
 	float denom = (NdotH2*(a2-1.0f)+1.0f);
 	denom = PI * denom * denom;
+	denom=max(denom,0.001);
 	
 	return num / denom; 
 }
@@ -45,6 +46,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 
 	float num = NdotV;
 	float denom = NdotV*(1.0f-k) +k;
+	denom=max(denom,0.001);
 	
 	return num / denom;
 }

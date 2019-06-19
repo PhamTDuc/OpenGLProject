@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -21,14 +22,12 @@ float lastX = 0.0f, lastY = 0.0f;
 float ratio = (float)4 / 3;
 Camera cam(glm::vec3(0.0f, 0.0f, 10.0f));
 
-<<<<<<< HEAD
 //Light Position
 static float lightPos_x = 0.0f;
 static float lightPos_y = 0.0f;
-=======
->>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
 
 int main() {
+	using namespace std::string_literals;
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -58,7 +57,11 @@ int main() {
 
 	Shader PBRShader("GLSL/Vertex.vs","GLSL/PBR/Fragment.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
+
 	Model sphere("Model/Sphere/LightSphere.obj");
+	Model suzane("Model/Suzane/Suzane.obj");
+
+	unsigned int texture=loadTexture("Model/Suzane/Stone_and_brick_pxr128.png");
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -79,18 +82,18 @@ int main() {
 		light.use();
 		light.setMat4fv("view", 1, GL_FALSE, cam.getView());
 		light.setMat4fv("projection", 1, GL_FALSE, projection);
-		glm::mat4 light_model(1.0f);
 		//T*R*S order
 		//T*R*S order
-<<<<<<< HEAD
-		light_model = glm::translate(light_model, glm::vec3(lightPos_x,lightPos_y,4.0f));
-=======
-		light_model = glm::translate(light_model, glm::vec3(0.5f,0.0f,4.0f));
->>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
-		light_model = glm::scale(light_model, glm::vec3(0.05f));
-		light.setMat4fv("model", 1, GL_FALSE, light_model);
-		light.setVec3("color", glm::vec3(1.0f));
-		sphere.Draw(light);
+		for(int i=0;i<2;i++)
+			for (int j = 0; j < 2; j++)
+			{
+				glm::mat4 light_model(1.0f);	
+				light_model = glm::translate(light_model, glm::vec3(lightPos_x+i*0.5, lightPos_y+j*1.0, 4.0f));
+				light_model = glm::scale(light_model, glm::vec3(0.1f));
+				light.setMat4fv("model", 1, GL_FALSE, light_model);
+				light.setVec3("color", glm::vec3(1.0f));
+				sphere.Draw(light);
+			}
 
 
 		//Setting Models
@@ -101,20 +104,29 @@ int main() {
 		PBRShader.setMat4fv("model", 1, GL_FALSE, glm::mat4(1.0f));
 		PBRShader.setVec3("viewPos", cam.getPos());
 		PBRShader.setVec3("albedo", glm::vec3(1.0f,0.0f,0.0f));
-<<<<<<< HEAD
-		PBRShader.setFloat("roughness", 0.4f);
-		PBRShader.setFloat("metalness", 0.0f);
-		PBRShader.setVec3("lights[0].pos", glm::vec3(lightPos_x, lightPos_y, 2.0f));
-=======
-		PBRShader.setFloat("roughness", 0.0f);
-		PBRShader.setFloat("metalness", 0.0f);
-		PBRShader.setVec3("lights[0].pos", glm::vec3(0.5f, 0.0f, 4.0f));
->>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
-		PBRShader.setVec3("lights[0].diffuse", glm::vec3(20.0f));
-		sphere.Draw(PBRShader);
+		PBRShader.setFloat("roughness", 0.1f);
+		PBRShader.setFloat("metallic", 0.0f);
+		PBRShader.setFloat("ao", 0.1f);
+		for(int i=0;i<2;i++)
+			for(int j=0;j<2;j++)
+			{	
+				PBRShader.setVec3("lights["s+std::to_string(i+j*2)+"].pos"s, glm::vec3(lightPos_x+i*0.5, lightPos_y+j*1.0, 4.0f));
+				PBRShader.setVec3("lights["s+std::to_string(i+j*2)+"].diffuse"s, glm::vec3(50.0f));
+			}
 
+		for (int i = 0; i < 6; i++)
+		{
+			for (int j = 0; j < 6; j++)
+			{
+				glm::mat4 model(1.0f);
+				model = glm::translate(model, glm::vec3(2.0*i, -2.0f*j, 0.0f));
+				PBRShader.setMat4fv("model", 1, GL_FALSE, model);
+				PBRShader.setFloat("roughness", 0.2*i);
+				PBRShader.setFloat("metallic", 0.2*j);
+				sphere.Draw(PBRShader);
+			}
+		}
 
-	
 
 
 		glfwSwapBuffers(window);
@@ -150,7 +162,6 @@ void processInput(GLFWwindow *window) {
 		cam.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.ProcessKeyboard(RIGHT, deltaTime);
-<<<<<<< HEAD
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		lightPos_x +=  0.4*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
@@ -159,9 +170,7 @@ void processInput(GLFWwindow *window) {
 		lightPos_y += 0.4*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		lightPos_y -= 0.4*deltaTime;
-=======
 
->>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

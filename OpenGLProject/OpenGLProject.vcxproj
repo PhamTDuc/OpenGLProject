@@ -155,7 +155,6 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="LoadingTexture.cpp" />
-    <ClCompile Include="Src\EntryPoint\PBRShading.cpp" />
     <ClCompile Include="Src\imgui\imgui.cpp" />
     <ClCompile Include="Src\imgui\imgui_demo.cpp" />
     <ClCompile Include="Src\imgui\imgui_draw.cpp" />
