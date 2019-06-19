@@ -21,9 +21,12 @@ float lastX = 0.0f, lastY = 0.0f;
 float ratio = (float)4 / 3;
 Camera cam(glm::vec3(0.0f, 0.0f, 10.0f));
 
+<<<<<<< HEAD
 //Light Position
 static float lightPos_x = 0.0f;
 static float lightPos_y = 0.0f;
+=======
+>>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
 
 int main() {
 	glfwInit();
@@ -79,7 +82,11 @@ int main() {
 		glm::mat4 light_model(1.0f);
 		//T*R*S order
 		//T*R*S order
+<<<<<<< HEAD
 		light_model = glm::translate(light_model, glm::vec3(lightPos_x,lightPos_y,4.0f));
+=======
+		light_model = glm::translate(light_model, glm::vec3(0.5f,0.0f,4.0f));
+>>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
 		light_model = glm::scale(light_model, glm::vec3(0.05f));
 		light.setMat4fv("model", 1, GL_FALSE, light_model);
 		light.setVec3("color", glm::vec3(1.0f));
@@ -94,9 +101,15 @@ int main() {
 		PBRShader.setMat4fv("model", 1, GL_FALSE, glm::mat4(1.0f));
 		PBRShader.setVec3("viewPos", cam.getPos());
 		PBRShader.setVec3("albedo", glm::vec3(1.0f,0.0f,0.0f));
+<<<<<<< HEAD
 		PBRShader.setFloat("roughness", 0.4f);
 		PBRShader.setFloat("metalness", 0.0f);
 		PBRShader.setVec3("lights[0].pos", glm::vec3(lightPos_x, lightPos_y, 2.0f));
+=======
+		PBRShader.setFloat("roughness", 0.0f);
+		PBRShader.setFloat("metalness", 0.0f);
+		PBRShader.setVec3("lights[0].pos", glm::vec3(0.5f, 0.0f, 4.0f));
+>>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
 		PBRShader.setVec3("lights[0].diffuse", glm::vec3(20.0f));
 		sphere.Draw(PBRShader);
 
@@ -137,6 +150,7 @@ void processInput(GLFWwindow *window) {
 		cam.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam.ProcessKeyboard(RIGHT, deltaTime);
+<<<<<<< HEAD
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		lightPos_x +=  0.4*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
@@ -145,6 +159,9 @@ void processInput(GLFWwindow *window) {
 		lightPos_y += 0.4*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		lightPos_y -= 0.4*deltaTime;
+=======
+
+>>>>>>> 6b431755e6e41d299c10600d0e9a32744c5d911b
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
