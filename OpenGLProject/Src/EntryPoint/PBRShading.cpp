@@ -61,7 +61,7 @@ int main() {
 	Model sphere("Model/Sphere/LightSphere.obj");
 	Model suzane("Model/Suzane/Suzane.obj");
 
-	unsigned int texture=loadTexture("Model/Suzane/Stone_and_brick_pxr128.png");
+	unsigned int texture=loadTexture("Model/Suzane/Stone_and_brick_pxr128.jpg");
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -103,7 +103,8 @@ int main() {
 		PBRShader.setMat4fv("projection", 1, GL_FALSE, projection);
 		PBRShader.setMat4fv("model", 1, GL_FALSE, glm::mat4(1.0f));
 		PBRShader.setVec3("viewPos", cam.getPos());
-		PBRShader.setVec3("albedo", glm::vec3(1.0f,0.0f,0.0f));
+		PBRShader.setBool("useTexture", false);
+		PBRShader.setVec3("color", glm::vec3(1.0f,0.0f,0.0f));
 		PBRShader.setFloat("roughness", 0.1f);
 		PBRShader.setFloat("metallic", 0.0f);
 		PBRShader.setFloat("ao", 0.1f);
@@ -126,8 +127,11 @@ int main() {
 				sphere.Draw(PBRShader);
 			}
 		}
-
-
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		PBRShader.setInt("albedoMap", 0);
+		PBRShader.setBool("useTexture", true);
+		suzane.Draw(PBRShader);
 
 		glfwSwapBuffers(window);
 	}

@@ -13,7 +13,9 @@ in vec3 Normal;
 
 uniform Light lights[4];
 uniform vec3 viewPos;
-uniform vec3 albedo;
+uniform vec3 color;
+uniform bool useTexture;
+uniform sampler2D albedoMap;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
@@ -64,7 +66,13 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 void main()
 {
 	vec3 N = normalize(Normal);
-	vec3 V = normalize(viewPos - FragPos);
+	vec3 V = normalize(viewPos - FragPos).rgb;
+
+	vec3 albedo;
+	if(useTexture)
+		albedo=texture(albedoMap,TexCoords).rgb;
+	else
+		albedo=color;
 
 
 	//Fresnel workflow
