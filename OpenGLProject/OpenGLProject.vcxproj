@@ -236,8 +236,12 @@
     <None Include="GLSL\ShadowMapping\PointShadow\Vertex.vs" />
     <None Include="GLSL\ShadowMapping\Vertex.vs" />
     <None Include="GLSL\Skybox\Fragment.fs" />
+    <None Include="GLSL\Skybox\FragmentHDR.fs" />
     <None Include="GLSL\Skybox\Vertex.vs" />
+    <None Include="GLSL\SphericalToCubemap\Fragment.fs" />
+    <None Include="GLSL\SphericalToCubemap\Vertex.vs" />
     <None Include="GLSL\Vertex.vs" />
+    <None Include="Texture\Alexs_Apt_Env.hdr" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Texture\brick.png" />

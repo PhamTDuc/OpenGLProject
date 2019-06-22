@@ -8,4 +8,5 @@
 #include <GLFW/glfw3.h>
 unsigned int loadTexture(const std::string &path, bool colorData=true);
 unsigned int loadCubemap(const std::vector<std::string> &faces);
+unsigned int loadHDR(const std::string &path);
 #endif

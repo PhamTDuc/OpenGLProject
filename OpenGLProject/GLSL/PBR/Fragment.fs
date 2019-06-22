@@ -19,9 +19,15 @@ uniform sampler2D albedoMap;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
+uniform samplerCube irradianceMap;
 
 const float PI = 3.14159265359;
-vec3 fresneslSchlick(float cosTheta,vec3 F0)
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}   
+
+vec3 fresnelSchlick(float cosTheta,vec3 F0)
 {
 	return F0 + (1-F0) * pow(1.0f - cosTheta, 5.0f);
 }
@@ -93,7 +99,7 @@ void main()
 		//Cook-Torrance BRDF
 		float D= DistributionGGX(N,H,roughness);
 		float G= GeometrySmith(N,V,L, roughness);
-		vec3 F = fresneslSchlick(max(dot(H,V),0.0f),F0);
+		vec3 F = fresnelSchlick(max(dot(H,V),0.0f),F0);
 
 		vec3 kS=F;
 		vec3 kD=vec3(1.0f)-kS;
@@ -109,8 +115,14 @@ void main()
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
 	}
 
-	vec3 ambient = vec3(0.03) * albedo * ao;
-    vec3 color = ambient + Lo;
+
+	//Ambient
+	vec3 kS=fresnelSchlickRoughness(max(dot(N,V),0.0f),F0,roughness);
+	vec3 kD=1.0 - kS;
+	kD *=1.0 - metallic;
+	vec3 irradiance = texture(irradianceMap,N).rgb;
+	vec3 ambient = (kD * irradiance* ao) * albedo;
+    vec3 color =Lo + ambient;
 	
 	//Color Correction
     color = color / (color + vec3(1.0));
