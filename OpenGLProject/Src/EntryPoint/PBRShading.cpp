@@ -187,10 +187,28 @@ int main() {
 				sphere.Draw(PBRShader);
 			}
 		}
+<<<<<<< HEAD
 	
+=======
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP,envCubemap);
+>>>>>>> b3dda69e468e22f84096220910df47052c098939
 		PBRShader.setInt("albedoMap", 0);
 		PBRShader.setBool("useTexture", true);
 		//suzane.Draw(PBRShader);
+
+		////Draw skybox
+		glDepthFunc(GL_LEQUAL);
+		glm::mat4 skybox_view = glm::mat4(glm::mat3(cam.getView()));
+		glDepthMask(GL_FALSE);
+		skyboxShader.use();
+		skyboxShader.setMat4fv("view", 1, GL_FALSE, skybox_view);
+		skyboxShader.setMat4fv("projection", 1, GL_FALSE, projection);
+		skyboxShader.setInt("skybox", 0);
+		renderCube();
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
+		glBindVertexArray(0);
 
 		////Draw skybox
 		glDepthFunc(GL_LEQUAL);
