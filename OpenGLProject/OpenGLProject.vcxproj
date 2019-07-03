@@ -240,6 +240,7 @@
     <None Include="GLSL\Skybox\Vertex.vs" />
     <None Include="GLSL\SphericalToCubemap\Fragment.fs" />
     <None Include="GLSL\SphericalToCubemap\Irradiance.fs" />
+    <None Include="GLSL\SphericalToCubemap\Specular.fs" />
     <None Include="GLSL\SphericalToCubemap\Vertex.vs" />
     <None Include="GLSL\Vertex.vs" />
     <None Include="Texture\Alexs_Apt_Env.hdr" />

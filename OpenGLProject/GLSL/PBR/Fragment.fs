@@ -15,11 +15,13 @@ uniform Light lights[16];
 uniform vec3 viewPos;
 uniform vec3 color;
 uniform bool useTexture;
-uniform sampler2D albedoMap;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
+uniform sampler2D albedoMap;
 uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLut;
 
 const float PI = 3.14159265359;
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
@@ -115,18 +117,29 @@ void main()
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
 	}
 
-
-	//Ambient
+	//Ambient Lighting
+	//----------------
+	//Ambient diffuse
 	vec3 kS=fresnelSchlickRoughness(max(dot(N,V),0.0f),F0,roughness);
 	vec3 kD=1.0 - kS;
 	kD *=1.0 - metallic;
 	vec3 irradiance = texture(irradianceMap,N).rgb;
-	vec3 ambient = (kD * irradiance* ao) * albedo;
-    vec3 color =Lo + ambient;
+	vec3 diffuse = kD * irradiance * albedo;
+
+
+	//Ambient reflection
+    const float MAX_REF_LOD = 4.0f;
+	vec3 R=reflect(-V,N);
+	vec3 prefilteredColor = textureLod(prefilterMap,R,roughness*MAX_REF_LOD).rgb;
+	vec2 envBRDF = texture(brdfLut,vec2(max(dot(N,V),0.0f),roughness)).rg;
+	vec3 specular = prefilteredColor * (kS*envBRDF.x + envBRDF.y);
 	
+	vec3 ambient = (diffuse + specular) * ao;
+
+	
+	vec3 color =Lo + ambient;
 	//Color Correction
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));  
-   
     FragColor = vec4(color, 1.0);
 }

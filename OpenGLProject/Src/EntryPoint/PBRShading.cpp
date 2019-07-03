@@ -63,12 +63,14 @@ int main() {
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
 	Shader toCubemap("GLSL/SphericalToCubemap/Vertex.vs", "GLSL/SphericalToCubemap/Fragment.fs");
 	Shader irradiance("GLSL/SphericalToCubemap/Vertex.vs","GLSL/SphericalToCubemap/Irradiance.fs");
+	Shader specular("GLSL/SphericalToCubemap/Vertex.vs", "GLSL/SphericalToCubemap/Specular.fs");
 	Shader skyboxShader("GLSL/Skybox/Vertex.vs", "GLSL/Skybox/FragmentHDR.fs");
 
 	Model sphere("Model/Sphere/LightSphere.obj");
 	Model suzane("Model/Suzane/Suzane.obj");
 
 	unsigned int texture=loadTexture("Model/Suzane/Stone_and_brick_pxr128.jpg");
+	unsigned int brdfLut = loadTexture("Texture/brdfLut.png");
 	unsigned int hdr = loadHDR("Texture/HDRIMG.hdr");
 	   	 
 	
@@ -123,7 +125,7 @@ int main() {
 		renderCube(); // renders a 1x1 cube
 	}
 
-	//convolution irradiance
+	//Convolution irradiance
 	unsigned int irradianceMap;
 	glGenTextures(1, &irradianceMap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
@@ -156,7 +158,48 @@ int main() {
 		renderCube();
 	}
 
+	//Convolution specular map
+	unsigned int prefilterMap;
+	glGenTextures(1, &prefilterMap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 256, 256, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
+	specular.use();
+	specular.setInt("environmentMap", 0);
+	specular.setMat4fv("projection",1,GL_FALSE,captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+	unsigned int mipMaxLevels = 5;
+	for (unsigned int mip = 0; mip < mipMaxLevels; mip++)
+	{
+		// reisze framebuffer according to mip-level size.
+		unsigned int mipWidth = 256 * std::pow(0.5, mip);
+		unsigned int mipHeight = 256 * std::pow(0.5, mip);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+		glViewport(0, 0, mipWidth, mipHeight);
+
+		float roughness = (float)mip / (float)(mipMaxLevels - 1);
+		specular.setFloat("roughness", roughness);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			specular.setMat4fv("view",1,GL_FALSE,captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			renderCube();
+		}
+	}
 
 	//Start to render
 	//--------------
@@ -204,9 +247,15 @@ int main() {
 		PBRShader.setVec3("color", glm::vec3(1.0f,0.0f,0.0f));
 		PBRShader.setFloat("roughness", 0.1f);
 		PBRShader.setFloat("metallic", 0.0f);
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
-		PBRShader.setInt("irradianceMap", 0);
+		PBRShader.setInt("irradianceMap", 3);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+		PBRShader.setInt("prefilterMap", 4);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, brdfLut);
+		PBRShader.setInt("brdfLut", 5);
 		PBRShader.setFloat("ao",10.0f);
 	
 		for(int i=0;i<4;i++)
@@ -247,7 +296,7 @@ int main() {
 		skyboxShader.setMat4fv("projection", 1, GL_FALSE, projection);
 		skyboxShader.setInt("skybox", 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP,envCubemap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP,prefilterMap);
 		renderCube();
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
@@ -275,8 +324,6 @@ void processInput(GLFWwindow *window) {
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-
-
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cam.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
