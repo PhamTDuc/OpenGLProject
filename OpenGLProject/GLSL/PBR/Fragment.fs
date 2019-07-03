@@ -11,7 +11,7 @@ in vec2 TexCoords;
 in vec3 FragPos; 
 in vec3 Normal;
 
-uniform Light lights[4];
+uniform Light lights[16];
 uniform vec3 viewPos;
 uniform vec3 color;
 uniform bool useTexture;
@@ -87,7 +87,7 @@ void main()
 
 
 	vec3 Lo=vec3(0.0f);
-	for(int i = 0; i<4;i++)
+	for(int i = 0; i<16;i++)
 	{
 		vec3 L = normalize(lights[i].pos - FragPos);
 		vec3 H = normalize(V+L);

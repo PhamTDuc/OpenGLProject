@@ -52,6 +52,9 @@ int main() {
 	}
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	//Initial Setup
+	//-----------------
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glViewport(0, 0, 800, 600);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -59,14 +62,18 @@ int main() {
 	Shader PBRShader("GLSL/Vertex.vs","GLSL/PBR/Fragment.fs");
 	Shader light("GLSL/LightShade/Vertex.vs", "GLSL/LightShade/Fragment.fs");
 	Shader toCubemap("GLSL/SphericalToCubemap/Vertex.vs", "GLSL/SphericalToCubemap/Fragment.fs");
+	Shader irradiance("GLSL/SphericalToCubemap/Vertex.vs","GLSL/SphericalToCubemap/Irradiance.fs");
 	Shader skyboxShader("GLSL/Skybox/Vertex.vs", "GLSL/Skybox/FragmentHDR.fs");
 
 	Model sphere("Model/Sphere/LightSphere.obj");
 	Model suzane("Model/Suzane/Suzane.obj");
 
 	unsigned int texture=loadTexture("Model/Suzane/Stone_and_brick_pxr128.jpg");
-	unsigned int hdr = loadHDR("Texture/Alexs_Apt_2k.hdr");
-
+	unsigned int hdr = loadHDR("Texture/HDRIMG.hdr");
+	   	 
+	
+	//Convert and Convolution in captureFBO FrameBuffer
+	//---------------------
 	unsigned int captureFBO, captureRBO;
 	glGenFramebuffers(1, &captureFBO);
 	glGenRenderbuffers(1, &captureRBO);
@@ -74,7 +81,20 @@ int main() {
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+	glm::mat4 captureViews[] =
+	{
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+	};
 
+	// convert HDR equirectangular environment map to cubemap equivalent
+	glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	unsigned int envCubemap;
 	glGenTextures(1, &envCubemap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
@@ -89,36 +109,57 @@ int main() {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-	glm::mat4 captureViews[] =
-	{
-	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-	};
-
-	// convert HDR equirectangular environment map to cubemap equivalent
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, hdr);
 	toCubemap.use();
 	toCubemap.setInt("equirectangularMap", 0);
 	toCubemap.setMat4fv("projection",1,GL_FALSE, captureProjection);
-
-	glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	for (unsigned int i = 0; i < 6; ++i)
 	{
 		toCubemap.setMat4fv("view",1,GL_FALSE,captureViews[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		renderCube(); // renders a 1x1 cube
 	}
+
+	//convolution irradiance
+	unsigned int irradianceMap;
+	glGenTextures(1, &irradianceMap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		// note that we store each face with 16 bit floating point values
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+			64, 64, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 64, 64);
+	irradiance.use();
+	irradiance.setInt("enviromentMap", 0);
+	irradiance.setMat4fv("projection", 1, GL_FALSE, captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+
+	glViewport(0, 0, 64, 64);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		irradiance.setMat4fv("view", 1, GL_FALSE, captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderCube();
+	}
+
+
+
+	//Start to render
+	//--------------
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, 800, 600);
 	while (!glfwWindowShouldClose(window)) {
@@ -141,11 +182,11 @@ int main() {
 		light.setMat4fv("projection", 1, GL_FALSE, projection);
 		//T*R*S order
 		//T*R*S order
-		for(int i=0;i<2;i++)
-			for (int j = 0; j < 2; j++)
+		for(int i=0;i<4;i++)
+			for (int j = 0; j < 4; j++)
 			{
 				glm::mat4 light_model(1.0f);	
-				light_model = glm::translate(light_model, glm::vec3(lightPos_x+i*0.5, lightPos_y+j*1.0, 4.0f));
+				light_model = glm::translate(light_model, glm::vec3(lightPos_x+i*1.5, lightPos_y+j*1.0, 4.0f));
 				light_model = glm::scale(light_model, glm::vec3(0.1f));
 				light.setMat4fv("model", 1, GL_FALSE, light_model);
 				light.setVec3("color", glm::vec3(1.0f));
@@ -153,7 +194,6 @@ int main() {
 			}
 
 
-		//Setting Models
 		//Setting Models
 		PBRShader.use();
 		PBRShader.setMat4fv("view", 1, GL_FALSE, cam.getView());
@@ -165,21 +205,31 @@ int main() {
 		PBRShader.setFloat("roughness", 0.1f);
 		PBRShader.setFloat("metallic", 0.0f);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-		PBRShader.setInt("irradianceMap", 0.0f);
-		PBRShader.setFloat("ao", 0.01f);
-		for(int i=0;i<2;i++)
-			for(int j=0;j<2;j++)
+		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+		PBRShader.setInt("irradianceMap", 0);
+		PBRShader.setFloat("ao",10.0f);
+	
+		for(int i=0;i<4;i++)
+			for(int j=0;j<4;j++)
 			{	
-				PBRShader.setVec3("lights["s+std::to_string(i+j*2)+"].pos"s, glm::vec3(lightPos_x+i*0.5, lightPos_y+j*1.0, 4.0f));
+				PBRShader.setVec3("lights["s+std::to_string(i+j*2)+"].pos"s, glm::vec3(lightPos_x+i*1.5, lightPos_y+j*1.0, 4.0f));
 				PBRShader.setVec3("lights["s+std::to_string(i+j*2)+"].diffuse"s, glm::vec3(50.0f));
 			}
+
+		//Draw Models
+		PBRShader.setInt("albedoMap", 0);
+		PBRShader.setBool("useTexture", true);
+		glm::mat4 suzane_model(1.0f);
+		suzane_model = glm::scale(suzane_model,glm::vec3(0.2f));
+		PBRShader.setMat4fv("model", 1, GL_FALSE, suzane_model);
+		suzane.Draw(PBRShader);
 
 		for (int i = 0; i < 6; i++)
 		{
 			for (int j = 0; j < 6; j++)
 			{
 				glm::mat4 model(1.0f);
+				PBRShader.setBool("useTexture", false);
 				model = glm::translate(model, glm::vec3(2.0*i, -2.0f*j, 0.0f));
 				PBRShader.setMat4fv("model", 1, GL_FALSE, model);
 				PBRShader.setFloat("roughness", 0.2*i);
@@ -187,42 +237,21 @@ int main() {
 				sphere.Draw(PBRShader);
 			}
 		}
-<<<<<<< HEAD
-	
-=======
+
+		//Draw skybox
+		glDepthFunc(GL_LEQUAL);
+		glm::mat4 skybox_view = glm::mat4(glm::mat3(cam.getView()));
+		glDepthMask(GL_FALSE);
+		skyboxShader.use();
+		skyboxShader.setMat4fv("view", 1, GL_FALSE, skybox_view);
+		skyboxShader.setMat4fv("projection", 1, GL_FALSE, projection);
+		skyboxShader.setInt("skybox", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP,envCubemap);
->>>>>>> b3dda69e468e22f84096220910df47052c098939
-		PBRShader.setInt("albedoMap", 0);
-		PBRShader.setBool("useTexture", true);
-		//suzane.Draw(PBRShader);
-
-		////Draw skybox
-		glDepthFunc(GL_LEQUAL);
-		glm::mat4 skybox_view = glm::mat4(glm::mat3(cam.getView()));
-		glDepthMask(GL_FALSE);
-		skyboxShader.use();
-		skyboxShader.setMat4fv("view", 1, GL_FALSE, skybox_view);
-		skyboxShader.setMat4fv("projection", 1, GL_FALSE, projection);
-		skyboxShader.setInt("skybox", 0);
 		renderCube();
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 		glBindVertexArray(0);
-
-		////Draw skybox
-		glDepthFunc(GL_LEQUAL);
-		glm::mat4 skybox_view = glm::mat4(glm::mat3(cam.getView()));
-		glDepthMask(GL_FALSE);
-		skyboxShader.use();
-		skyboxShader.setMat4fv("view", 1, GL_FALSE, skybox_view);
-		skyboxShader.setMat4fv("projection", 1, GL_FALSE, projection);
-		skyboxShader.setInt("skybox", 0);
-		renderCube();
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
-		glBindVertexArray(0);
-
 		glfwSwapBuffers(window);
 	}
 
