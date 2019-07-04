@@ -74,7 +74,11 @@ void main()
     vec3 R = N;
     vec3 V = R;
 
+<<<<<<< HEAD
     const uint SAMPLE_COUNT = 128;
+=======
+    const uint SAMPLE_COUNT = 1024;
+>>>>>>> 24a3f4346f25ca3964bdaa6dde25bb42d7a640c5
     float totalWeight = 0.0f;   
     vec3 prefilteredColor = vec3(0.0f);     
     for(uint i = 0u; i < SAMPLE_COUNT; ++i)
@@ -99,6 +103,10 @@ void main()
 
 
 			prefilteredColor += textureLod(environmentMap, L ,mipLevel).rgb * NdotL;
+<<<<<<< HEAD
+=======
+            totalWeight      += NdotL;
+>>>>>>> 24a3f4346f25ca3964bdaa6dde25bb42d7a640c5
         }
     }
     prefilteredColor = prefilteredColor / SAMPLE_COUNT;
