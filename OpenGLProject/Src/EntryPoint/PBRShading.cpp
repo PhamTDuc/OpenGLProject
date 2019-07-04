@@ -256,7 +256,7 @@ int main() {
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, brdfLut);
 		PBRShader.setInt("brdfLut", 5);
-		PBRShader.setFloat("ao",10.0f);
+		PBRShader.setFloat("ao",1.0f);
 	
 		for(int i=0;i<4;i++)
 			for(int j=0;j<4;j++)
