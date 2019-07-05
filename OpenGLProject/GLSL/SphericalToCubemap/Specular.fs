@@ -74,7 +74,6 @@ void main()
         if(NdotL > 0.0)
         {
             prefilteredColor += texture(environmentMap, L).rgb * NdotL;
-
             totalWeight      += NdotL;
         }
     }
