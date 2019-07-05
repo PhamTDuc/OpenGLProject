@@ -111,6 +111,9 @@ int main() {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, hdr);
 	toCubemap.use();
@@ -213,8 +216,6 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
 		glm::mat4 projection;
 		projection = glm::perspective(glm::radians(35.0f), ratio, 0.1f, 1000.0f);
 
@@ -256,7 +257,7 @@ int main() {
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, brdfLut);
 		PBRShader.setInt("brdfLut", 5);
-		PBRShader.setFloat("ao",1.0f);
+		PBRShader.setFloat("ao",10.0f);
 	
 		for(int i=0;i<4;i++)
 			for(int j=0;j<4;j++)
@@ -296,7 +297,7 @@ int main() {
 		skyboxShader.setMat4fv("projection", 1, GL_FALSE, projection);
 		skyboxShader.setInt("skybox", 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP,prefilterMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP,envCubemap);
 		renderCube();
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);

@@ -33,7 +33,7 @@ vec2 Hammersley(uint i, uint N)
 
 vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 {
-    float a = roughness*roughness;
+    float a = roughness*roughness*roughness*roughness;
 	
     float phi = 2.0 * PI * Xi.x;
     float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
@@ -53,10 +53,12 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
     vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
     return normalize(sampleVec);
 }  
-float DistributionGGX(float NdotH, float roughness) 
+
+float DistributionGGX(vec3 N, vec3 H, float roughness) 
 {
 	float a = roughness * roughness;
 	float a2 = a*a;
+	float NdotH = max(dot(N,H),0.0f);
 	float NdotH2= NdotH*NdotH;
 
 	float num = a2;
@@ -67,49 +69,41 @@ float DistributionGGX(float NdotH, float roughness)
 	return num / denom; 
 }
 
-
 void main()
 {		
     vec3 N = normalize(localPos);    
     vec3 R = N;
     vec3 V = R;
 
-<<<<<<< HEAD
-    const uint SAMPLE_COUNT = 128;
-=======
-    const uint SAMPLE_COUNT = 1024;
->>>>>>> 24a3f4346f25ca3964bdaa6dde25bb42d7a640c5
+    const uint SAMPLE_COUNT = 512;
+	float resolution = 512.0f;
     float totalWeight = 0.0f;   
     vec3 prefilteredColor = vec3(0.0f);     
+
     for(uint i = 0u; i < SAMPLE_COUNT; ++i)
     {
         vec2 Xi = Hammersley(i, SAMPLE_COUNT);
         vec3 H  = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L  = normalize(2.0 * dot(V, H) * H - V);
+		
 		float NdotH = max(dot(N,H),0.0);
 		float HdotV = max(dot(H,V),0.0);
-
         float NdotL = max(dot(N, L), 0.0);
         if(NdotL > 0.0)
         {
-			float D=DistributionGGX(NdotH,roughness);
+			float D=DistributionGGX(N,H,roughness);
 			float pdf=( D + NdotH/( 4.0*HdotV ))+ 0.0001;
 
-			float resolution = 512.0f;
 			float saTexel = 4.0 * PI / (6.0 * resolution * resolution);
 			float saSample = 1.0 / (SAMPLE_COUNT*pdf + 0.0001);
 			float mipLevel = (roughness == 0.0) ? 0.0 : 0.5 * log2(saSample/saTexel);
 			
-
-
-			prefilteredColor += textureLod(environmentMap, L ,mipLevel).rgb * NdotL;
-<<<<<<< HEAD
-=======
+			prefilteredColor += textureLod(environmentMap, L,mipLevel ).rgb * NdotL;
             totalWeight      += NdotL;
->>>>>>> 24a3f4346f25ca3964bdaa6dde25bb42d7a640c5
+
         }
     }
-    prefilteredColor = prefilteredColor / SAMPLE_COUNT;
+    prefilteredColor = prefilteredColor / max(totalWeight,0.001f);
 
     FragColor = vec4(prefilteredColor, 1.0);
 }  
